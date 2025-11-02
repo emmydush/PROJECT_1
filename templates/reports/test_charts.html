@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Chart Test - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Chart Background Test</h2>
+    <a href="{% url 'reports:list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Reports
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Line Chart (No Background)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="lineChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Bar Chart (No Background)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="barChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Line Chart Test
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Sales',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: null, // Completely remove background
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Bar Chart Test
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Product A', 'Product B', 'Product C', 'Product D'],
+            datasets: [{
+                label: 'Units Sold',
+                data: [12, 19, 3, 5],
+                backgroundColor: null, // Completely remove background
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

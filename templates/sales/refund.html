@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Refund Sale #{{ sale.id }} - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-white">
+                <h3><i class="fas fa-undo"></i> Refund Sale #{{ sale.id }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Total Sale Amount:</strong> ${{ sale.total_amount }}
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Refund</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="refund_amount" class="form-label">Refund Amount</label>
+                        <input type="number" class="form-control" id="refund_amount" name="refund_amount" 
+                               min="0" max="{{ sale.total_amount }}" step="0.01" 
+                               value="{{ sale.total_amount }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Process Refund</button>
+                    <a href="{% url 'sales:detail' sale.pk %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

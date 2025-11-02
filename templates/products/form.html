@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-box"></i> {{ title }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Product Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.sku.id_for_label }}" class="form-label">SKU</label>
+                                {{ form.sku }}
+                                {% if form.sku.errors %}
+                                    <div class="text-danger">{{ form.sku.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.barcode.id_for_label }}" class="form-label">Barcode</label>
+                                <div class="input-group">
+                                    {{ form.barcode }}
+                                    <button class="btn btn-outline-secondary" type="button" id="scanBarcodeBtn" title="Scan Barcode">
+                                        <i class="fas fa-barcode"></i> Scan
+                                    </button>
+                                </div>
+                                {% if form.barcode.help_text %}
+                                    <div class="form-text">{{ form.barcode.help_text }}</div>
+                                {% endif %}
+                                {% if form.barcode.errors %}
+                                    <div class="text-danger">{{ form.barcode.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.unit.id_for_label }}" class="form-label">Unit</label>
+                                {{ form.unit }}
+                                {% if form.unit.errors %}
+                                    <div class="text-danger">{{ form.unit.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.barcode_format.id_for_label }}" class="form-label">Barcode Format</label>
+                        {{ form.barcode_format }}
+                        {% if form.barcode_format.help_text %}
+                            <div class="form-text">{{ form.barcode_format.help_text }}</div>
+                        {% endif %}
+                        {% if form.barcode_format.errors %}
+                            <div class="text-danger">{{ form.barcode_format.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.cost_price.id_for_label }}" class="form-label">Cost Price</label>
+                                {{ form.cost_price }}
+                                {% if form.cost_price.errors %}
+                                    <div class="text-danger">{{ form.cost_price.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.selling_price.id_for_label }}" class="form-label">Selling Price</label>
+                                {{ form.selling_price }}
+                                {% if form.selling_price.errors %}
+                                    <div class="text-danger">{{ form.selling_price.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity</label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.reorder_level.id_for_label }}" class="form-label">Reorder Level</label>
+                                {{ form.reorder_level }}
+                                {% if form.reorder_level.errors %}
+                                    <div class="text-danger">{{ form.reorder_level.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Expiry Date</label>
+                        {{ form.expiry_date }}
+                        {% if form.expiry_date.errors %}
+                            <div class="text-danger">{{ form.expiry_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">Product Image</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="text-danger">{{ form.image.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="form-check-label">Is Active</label>
+                        {% if form.is_active.errors %}
+                            <div class="text-danger">{{ form.is_active.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ title }}</button>
+                    <a href="{% url 'products:list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Barcode scanner functionality for product form
+document.addEventListener('DOMContentLoaded', function() {
+    const scanBtn = document.getElementById('scanBarcodeBtn');
+    const barcodeInput = document.getElementById('{{ form.barcode.id_for_label }}');
+    
+    if (scanBtn && barcodeInput) {
+        scanBtn.addEventListener('click', function() {
+            // Create scanner modal
+            createScannerModal();
+        });
+    }
+    
+    function createScannerModal() {
+        // Remove any existing scanner modal
+        const existingModal = document.getElementById('productFormScannerModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create scanner modal HTML
+        const scannerModalHtml = `
+            <div class="modal fade" id="productFormScannerModal" tabindex="-1" aria-labelledby="productFormScannerModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productFormScannerModalLabel">Scan Barcode</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div id="productFormScannerContainer" style="position: relative; width: 100%; height: 300px; border: 2px solid #007bff; border-radius: 8px; overflow: hidden;">
+                                <video id="productFormScannerVideo" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <div id="productFormScannerOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 20%; border: 3px solid rgba(0, 255, 0, 0.8); box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5); animation: scannerPulse 2s infinite;"></div>
+                                </div>
+                            </div>
+                            <div id="productFormScannerStatus" class="mt-2 alert alert-info">Scanner not started. Make sure to allow camera access when prompted.</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', scannerModalHtml);
+        
+        // Get the newly created modal
+        const scannerModal = document.getElementById('productFormScannerModal');
+        
+        // Show the modal
+        const modal = new bootstrap.Modal(scannerModal);
+        modal.show();
+        
+        // Initialize scanner when modal is shown
+        scannerModal.addEventListener('shown.bs.modal', () => {
+            setTimeout(() => {
+                initProductFormScanner();
+            }, 100);
+        });
+        
+        // Clean up when modal is hidden
+        scannerModal.addEventListener('hidden.bs.modal', () => {
+            stopProductFormScanner();
+            // Remove modal from DOM after a short delay to ensure animations complete
+            setTimeout(() => {
+                if (scannerModal.parentNode) {
+                    scannerModal.parentNode.removeChild(scannerModal);
+                }
+            }, 300);
+        });
+    }
+    
+    function initProductFormScanner() {
+        // Check if QuaggaJS is loaded
+        if (typeof Quagga === 'undefined') {
+            alert('Barcode scanner library not loaded. Please refresh the page.');
+            return;
+        }
+
+        // Check if we're in a secure context
+        if (!window.isSecureContext) {
+            alert('Camera requires HTTPS or localhost');
+            return;
+        }
+
+        // Get scanner elements
+        const scannerVideo = document.getElementById('productFormScannerVideo');
+        const scannerStatus = document.getElementById('productFormScannerStatus');
+        const scannerContainer = document.getElementById('productFormScannerContainer');
+        
+        // Check if elements exist
+        if (!scannerVideo || !scannerStatus || !scannerContainer) {
+            console.error('Scanner elements not found');
+            alert('Scanner failed to initialize. Please try again.');
+            return;
+        }
+
+        // Update status
+        scannerStatus.textContent = 'Initializing camera...';
+        scannerStatus.className = 'mt-2 alert alert-warning';
+
+        // Configure QuaggaJS
+        const config = {
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: scannerVideo,
+                constraints: {
+                    facingMode: "environment", // Use rear camera
+                    width: { min: 640 },
+                    height: { min: 480 }
+                }
+            },
+            decoder: {
+                readers: [
+                    "code_128_reader",
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_39_reader",
+                    "upc_reader",
+                    "upc_e_reader"
+                ]
+            },
+            locator: {
+                halfSample: false,
+                patchSize: "medium"
+            }
+        };
+
+        Quagga.init(config, (err) => {
+            if (err) {
+                console.error('Error initializing scanner:', err);
+                let errorMessage = 'Error initializing camera';
+                if (err.message) {
+                    errorMessage += ': ' + err.message;
+                } else if (typeof err === 'string') {
+                    errorMessage += ': ' + err;
+                }
+                scannerStatus.textContent = errorMessage;
+                scannerStatus.className = 'mt-2 alert alert-danger';
+                
+                // Handle specific error types
+                if (err.name === 'NotAllowedError' || err.message.includes('Permission') || err.message.includes('permission')) {
+                    scannerStatus.innerHTML = 'Camera permission denied. Please allow camera access.<br><br>' +
+                        '<button class="btn btn-sm btn-primary" onclick="location.reload()">Retry Camera Access</button>';
+                } else if (err.name === 'NotFoundError' || err.message.includes('NotFoundError')) {
+                    scannerStatus.textContent = 'No camera found. Please connect a camera and try again.';
+                } else if (err.name === 'NotReadableError') {
+                    scannerStatus.textContent = 'Camera is already in use. Close other applications using the camera.';
+                }
+                return;
+            }
+
+            // Start scanning
+            Quagga.start();
+            
+            scannerStatus.textContent = 'Scanner started. Position barcode in the frame';
+            scannerStatus.className = 'mt-2 alert alert-success';
+
+            // Add drawing canvas for debug visualization
+            Quagga.onProcessed((result) => {
+                var drawingCtx = Quagga.canvas.ctx.overlay;
+                var drawingCanvas = Quagga.canvas.dom.overlay;
+
+                if (result) {
+                    if (result.boxes) {
+                        drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                        result.boxes.filter(function (box) {
+                            return box !== result.box;
+                        }).forEach(function (box) {
+                            Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                        });
+                    }
+
+                    if (result.box) {
+                        Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                    }
+
+                    if (result.codeResult && result.codeResult.code) {
+                        Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+                    }
+                }
+            });
+        });
+
+        // Register callback for detected barcodes
+        Quagga.onDetected(function(result) {
+            const code = result.codeResult.code;
+            console.log('Barcode detected:', code);
+            
+            scannerStatus.textContent = 'Barcode detected: ' + code;
+            scannerStatus.className = 'mt-2 alert alert-success';
+            
+            // Set the barcode value in the input field
+            barcodeInput.value = code;
+            
+            // Stop scanner and close modal
+            stopProductFormScanner();
+            
+            setTimeout(function() {
+                const scannerModal = bootstrap.Modal.getInstance(document.getElementById('productFormScannerModal'));
+                if (scannerModal) {
+                    scannerModal.hide();
+                }
+            }, 1000);
+        });
+    }
+    
+    function stopProductFormScanner() {
+        if (typeof Quagga !== 'undefined' && Quagga) {
+            try {
+                Quagga.stop();
+                console.log('Quagga scanner stopped');
+            } catch (e) {
+                console.error('Error stopping Quagga:', e);
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

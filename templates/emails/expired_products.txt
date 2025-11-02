@@ -1,0 +1,23 @@
+{{ business_name }} - Expired Products Alert
+============================================
+
+Hello Admin,
+
+This is an automated alert to inform you that the following products have expired as of {{ today }}:
+
+{% if expired_products %}
+Product Name | SKU | Expiry Date | Quantity
+-------------|-----|-------------|----------
+{% for product in expired_products %}{{ product.name }} | {{ product.sku }} | {{ product.expiry_date }} | {{ product.quantity }}
+{% endfor %}
+
+ACTION REQUIRED: Please review these expired products and take appropriate action (e.g., remove from inventory, return to supplier, etc.).
+{% else %}
+No expired products found.
+{% endif %}
+
+Thank you,
+{{ business_name }} Inventory Management System
+
+---
+This is an automated message. Please do not reply to this email.

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Expense - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h5>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the expense <strong>"{{ expense.category.name }} - {{ business_settings.currency_symbol }} {{ expense.amount }}"</strong> dated <strong>{{ expense.date|date:"M d, Y" }}</strong>?</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'expenses:detail' expense.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

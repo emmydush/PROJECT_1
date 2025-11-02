@@ -1,0 +1,158 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}Dashboard - Super Admin - Smart Solution{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Super Admin Dashboard</h1>
+  <div>
+    <button class="btn btn-primary">
+      <i class="fas fa-sync-alt me-1"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number">{{ total_businesses }}</h5>
+            <p class="stat-label mb-0">Total Businesses</p>
+          </div>
+          <div class="bg-primary text-white p-3 rounded-circle">
+            <i class="fas fa-building fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number">{{ total_users }}</h5>
+            <p class="stat-label mb-0">Total Users</p>
+          </div>
+          <div class="bg-success text-white p-3 rounded-circle">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number">{{ active_subscriptions }}</h5>
+            <p class="stat-label mb-0">Active Subscriptions</p>
+          </div>
+          <div class="bg-info text-white p-3 rounded-circle">
+            <i class="fas fa-credit-card fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number">{{ total_revenue|floatformat:2 }}</h5>
+            <p class="stat-label mb-0">Total Revenue</p>
+          </div>
+          <div class="bg-warning text-white p-3 rounded-circle">
+            <i class="fas fa-dollar-sign fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Businesses</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Owner</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for business in recent_businesses %}
+            <tr>
+              <td>{{ business.company_name }}</td>
+              <td>{{ business.owner.username }}</td>
+              <td>
+                <span class="badge {% if business.status == 'active' %}bg-success{% elif business.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                  {{ business.status|title }}
+                </span>
+              </td>
+              <td>{{ business.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center">No businesses found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent System Logs</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Message</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_logs %}
+            <tr>
+              <td>
+                <span class="badge {% if log.level == 'info' %}bg-info{% elif log.level == 'warning' %}bg-warning{% elif log.level == 'error' %}bg-danger{% else %}bg-dark{% endif %}">
+                  {{ log.level|upper }}
+                </span>
+              </td>
+              <td>{{ log.message|truncatewords:5 }}</td>
+              <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">No logs found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

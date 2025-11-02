@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Barcode Settings - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-barcode"></i> Barcode Settings</h2>
+        <p class="text-muted">Configure barcode generation settings and formats.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="border rounded p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="barcode_type" class="form-label">Barcode Type</label>
+                    <select class="form-select" id="barcode_type" name="barcode_type">
+                        <option value="CODE128" {% if settings.barcode_type == 'CODE128' %}selected{% endif %}>Code 128</option>
+                        <option value="CODE39" {% if settings.barcode_type == 'CODE39' %}selected{% endif %}>Code 39</option>
+                        <option value="EAN13" {% if settings.barcode_type == 'EAN13' %}selected{% endif %}>EAN-13</option>
+                        <option value="UPC-A" {% if settings.barcode_type == 'UPC-A' %}selected{% endif %}>UPC-A</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="barcode_width" class="form-label">Width (pixels)</label>
+                            <input type="number" class="form-control" id="barcode_width" name="barcode_width" 
+                                   value="{{ settings.barcode_width }}" min="100" max="1000">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="barcode_height" class="form-label">Height (pixels)</label>
+                            <input type="number" class="form-control" id="barcode_height" name="barcode_height" 
+                                   value="{{ settings.barcode_height }}" min="50" max="500">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="display_text" name="display_text" 
+                           {% if settings.display_text %}checked{% endif %}>
+                    <label class="form-check-label" for="display_text">Display Text Below Barcode</label>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <a href="{% url 'settings:index' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'authentication/base_auth.html' %}
+
+{% block title %}Register - {{ business_settings.business_name }}{% endblock %}
+
+{% block content %}
+<!-- Beautiful Header -->
+<div class="container-fluid bg-success text-white py-3 mb-0">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    {% if business_settings.business_logo %}
+                        <img src="{{ business_settings.business_logo.url }}" alt="{{ business_settings.business_name }} Logo" class="me-3" style="max-height: 40px; width: auto;">
+                    {% endif %}
+                    <div>
+                        <h1 class="h3 fw-bold mb-1">
+                            {{ business_settings.business_name }}
+                        </h1>
+                        <p class="mb-0 small">Intelligent. Efficient. Simplified.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-flex justify-content-md-end align-items-center gap-2">
+                    <!-- Language Selector -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>
+                            <span class="d-none d-sm-inline">Language</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="#" data-lang="en">English</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="es">Español</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="fr">Français</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="de">Deutsch</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Theme Toggle Button -->
+                    <div class="theme-toggle-container">
+                        <button id="themeToggle" class="theme-toggle btn btn-sm btn-outline-light" aria-label="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Form Container -->
+<div class="container d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 120px);">
+    <div class="card shadow-lg rounded-4 border-0" style="width: 100%; max-width: 500px;">
+        <div class="card-body p-4">
+            <h2 class="fw-bold mb-3 h4 text-center"><i class="fas fa-user-plus me-2"></i>Create Account</h2>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label small">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger mt-1">
+                                    <small>{{ form.first_name.errors }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label small">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger mt-1">
+                                    <small>{{ form.last_name.errors }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label small">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-danger mt-1">
+                            <small>{{ form.username.errors }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label small">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-danger mt-1">
+                            <small>{{ form.email.errors }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label small">Password</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <div class="text-danger mt-1">
+                                    <small>{{ form.password1.errors }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label small">Confirm Password</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger mt-1">
+                                    <small>{{ form.password2.errors }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.phone.id_for_label }}" class="form-label small">Phone</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="text-danger mt-1">
+                            <small>{{ form.phone.errors }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.address.id_for_label }}" class="form-label small">Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="text-danger mt-1">
+                            <small>{{ form.address.errors }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.profile_picture.id_for_label }}" class="form-label small">Profile Picture</label>
+                    {{ form.profile_picture }}
+                    {% if form.profile_picture.errors %}
+                        <div class="text-danger mt-1">
+                            <small>{{ form.profile_picture.errors }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-pill mb-3">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="text-center">
+                <p class="mb-0 small">
+                    Already have an account? 
+                    <a href="{% url 'authentication:login' %}" class="fw-bold text-decoration-none">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom styles for the header -->
+<style>
+    .theme-toggle, .dropdown-toggle {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover, .dropdown-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .theme-toggle i {
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+    }
+</style>
+
+<!-- JavaScript for language switching -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language switching functionality
+        const languageItems = document.querySelectorAll('[data-lang]');
+        languageItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedLang = this.getAttribute('data-lang');
+                // In a real implementation, this would send a request to change the language
+                // For now, we'll just show an alert
+                alert(`Language would be changed to: ${this.textContent}`);
+                // Update the dropdown button text to show current language
+                const dropdownToggle = document.querySelector('#languageDropdown');
+                dropdownToggle.innerHTML = `<i class="fas fa-globe me-1"></i><span class="d-none d-sm-inline">${this.textContent}</span>`;
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+# Local Settings - Keep this file out of version control
+# Copy this file to local_settings.py and update with your actual credentials
+
+# Gmail Configuration
+EMAIL_HOST_USER = 'your-email@gmail.com'  # Replace with your actual Gmail address
+EMAIL_HOST_PASSWORD = 'srin jitw qwpy gaaz'  # Your app password
+DEFAULT_FROM_EMAIL = 'Inventory Management System <your-email@gmail.com>'  # Replace with your actual Gmail address
+
+# Business Settings (if needed)
+# BUSINESS_EMAIL = 'your-business-email@gmail.com'

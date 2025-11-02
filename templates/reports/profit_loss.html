@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Profit & Loss Report - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Profit & Loss Report</h2>
+    <div>
+        <a href="?export=csv&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export CSV
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Sales Revenue</h5>
+                <h2>{{ business_settings.currency_symbol }} {{ sales_revenue|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Cost of Goods Sold</h5>
+                <h2>{{ business_settings.currency_symbol }} {{ cogs|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Gross Profit</h5>
+                <h2>{{ business_settings.currency_symbol }} {{ gross_profit|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Net Profit</h5>
+                <h2>{{ business_settings.currency_symbol }} {{ net_profit|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profit Trend Chart -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Profit Trend (Last 30 Days)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="profitTrendChart" height="100" aria-label="Profit trend chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Financial Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Sales Revenue</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ sales_revenue|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Cost of Goods Sold (COGS)</th>
+                                <td class="text-end">({{ business_settings.currency_symbol }} {{ cogs|floatformat:2 }})</td>
+                            </tr>
+                            <tr class="table-info">
+                                <th>Gross Profit</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ gross_profit|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Operating Expenses</th>
+                                <td class="text-end">({{ business_settings.currency_symbol }} {{ total_expenses|floatformat:2 }})</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <th>Net Profit</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ net_profit|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Profit Summary -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Monthly Profit Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Revenue</th>
+                                <th>COGS</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month in monthly_profit_summary %}
+                            <tr>
+                                <td>{{ month.month }}</td>
+                                <td>{{ business_settings.currency_symbol }} {{ month.revenue|floatformat:2 }}</td>
+                                <td>{{ business_settings.currency_symbol }} {{ month.cogs|floatformat:2 }}</td>
+                                <td class="{% if month.profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ business_settings.currency_symbol }} {{ month.profit|floatformat:2 }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Profitability Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Gross Profit Margin</h6>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" role="progressbar" 
+                             data-width="{% if sales_revenue > 0 %}{{ gross_profit_margin|floatformat:0 }}{% else %}0{% endif %}"
+                             aria-valuenow="{% if sales_revenue > 0 %}{{ gross_profit_margin|floatformat:0 }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {% if sales_revenue > 0 %}{{ gross_profit_margin|floatformat:1 }}%{% else %}0%{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Net Profit Margin</h6>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" role="progressbar" 
+                             data-width="{% if sales_revenue > 0 %}{{ net_profit_margin|floatformat:0 }}{% else %}0{% endif %}"
+                             aria-valuenow="{% if sales_revenue > 0 %}{{ net_profit_margin|floatformat:0 }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {% if sales_revenue > 0 %}{{ net_profit_margin|floatformat:1 }}%{% else %}0%{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Parse JSON data
+    const profitDates = JSON.parse('{{ profit_dates_json|escapejs }}');
+    const profitAmounts = JSON.parse('{{ profit_amounts_json|escapejs }}');
+    
+    // Set progress bar widths based on data attributes
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                bar.style.width = width + '%';
+            }
+        });
+    });
+    
+    // Profit Trend Chart
+    const profitCtx = document.getElementById('profitTrendChart').getContext('2d');
+    if (profitCtx) {
+        const profitChart = new Chart(profitCtx, {
+            type: 'line',
+            data: {
+                labels: profitDates,
+                datasets: [{
+                    label: 'Profit ({{ business_settings.currency_symbol }})',
+                    data: profitAmounts,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'transparent', // Removed background
+                    tension: 0.1,
+                    fill: false,
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '{{ business_settings.currency_symbol }}' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Sale - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-trash-alt"></i> Delete Sale</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Warning!</h4>
+                    <p>You are about to delete the following sale:</p>
+                    <ul>
+                        <li><strong>Sale ID:</strong> Sale-{{ sale.id }}</li>
+                        <li><strong>Date:</strong> {{ sale.sale_date|date:"M d, Y H:i" }}</li>
+                        <li><strong>Total Amount:</strong> ${{ sale.total_amount }}</li>
+                        <li><strong>Customer:</strong> {{ sale.customer.full_name|default:"Walk-in Customer" }}</li>
+                    </ul>
+                    <p><strong>This action cannot be undone.</strong> Deleting this sale will:</p>
+                    <ul>
+                        <li>Permanently remove the sale record</li>
+                        <li>Restore the product quantities to their pre-sale levels</li>
+                        <li>Delete all associated sale items</li>
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'sales:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Confirm Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

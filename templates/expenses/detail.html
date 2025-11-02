@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Expense Details - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Expense Details</h2>
+    <div>
+        <a href="{% url 'expenses:update' expense.pk %}" class="btn btn-warning me-2">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'expenses:delete' expense.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Expense Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Category:</strong> {{ expense.category.name }}</p>
+                        <p><strong>Date:</strong> {{ expense.date|date:"M d, Y" }}</p>
+                        <p><strong>Amount:</strong> {{ business_settings.currency_symbol }} {{ expense.amount }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Created:</strong> {{ expense.created_at|date:"M d, Y H:i" }}</p>
+                        <p><strong>Last Updated:</strong> {{ expense.updated_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Description:</strong>
+                    <p class="mt-2">{{ expense.description|default:"N/A" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Receipt</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if expense.receipt %}
+                    <img src="{{ expense.receipt.url }}" alt="Receipt" class="img-fluid mb-3">
+                    <a href="{{ expense.receipt.url }}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Receipt
+                    </a>
+                {% else %}
+                    <p class="text-muted">No receipt uploaded.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'expenses:list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Expenses
+    </a>
+</div>
+{% endblock %}

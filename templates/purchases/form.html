@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-truck"></i> {{ title }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.supplier.id_for_label }}" class="form-label">Supplier</label>
+                                {{ form.supplier }}
+                                {% if form.supplier.errors %}
+                                    <div class="text-danger">{{ form.supplier.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.expected_delivery_date.id_for_label }}" class="form-label">Expected Delivery Date</label>
+                                {{ form.expected_delivery_date }}
+                                {% if form.expected_delivery_date.errors %}
+                                    <div class="text-danger">{{ form.expected_delivery_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger">{{ form.notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Order Items</h5>
+                                </div>
+                                <div class="card-body">
+                                    {{ formset.management_form }}
+                                    {% for item_form in formset %}
+                                        <div class="item-form mb-3 p-3 border rounded">
+                                            {% if item_form.non_field_errors %}
+                                                <div class="alert alert-danger">{{ item_form.non_field_errors }}</div>
+                                            {% endif %}
+                                            {% for hidden in item_form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <label for="{{ item_form.product.id_for_label }}" class="form-label">Product</label>
+                                                    {{ item_form.product }}
+                                                    {% if item_form.product.errors %}
+                                                        <div class="text-danger">{{ item_form.product.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="{{ item_form.quantity.id_for_label }}" class="form-label">Quantity</label>
+                                                    {{ item_form.quantity }}
+                                                    {% if item_form.quantity.errors %}
+                                                        <div class="text-danger">{{ item_form.quantity.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="{{ item_form.unit_price.id_for_label }}" class="form-label">Unit Price</label>
+                                                    {{ item_form.unit_price }}
+                                                    {% if item_form.unit_price.errors %}
+                                                        <div class="text-danger">{{ item_form.unit_price.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-1 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-danger remove-item">X</button>
+                                                </div>
+                                            </div>
+                                            <!-- Total Price Display -->
+                                            <div class="row mt-2">
+                                                <div class="col-md-12">
+                                                    <label class="form-label">Total Price</label>
+                                                    <input type="text" class="form-control total-price-display" readonly value="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <button type="button" id="add-item" class="btn btn-secondary">Add Another Item</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">{{ title }}</button>
+                        <a href="{% url 'purchases:list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to get product price
+        function getProductPrice(productId, priceInput) {
+            if (!productId) {
+                priceInput.value = '';
+                return;
+            }
+            
+            // Fetch the product price from the server
+            fetch(`/products/${productId}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.selling_price) {
+                        priceInput.value = data.selling_price;
+                        // Trigger calculation after auto-filling price
+                        calculateTotal(priceInput);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching product price:', error);
+                });
+        }
+        
+        // Function to calculate total price
+        function calculateTotal(inputElement) {
+            const itemForm = inputElement.closest('.item-form');
+            if (!itemForm) return;
+            
+            const quantityInput = itemForm.querySelector('input[name$="quantity"]');
+            const priceInput = itemForm.querySelector('input[name$="unit_price"]');
+            const totalDisplay = itemForm.querySelector('.total-price-display');
+            
+            if (quantityInput && priceInput && totalDisplay) {
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const total = quantity * price;
+                totalDisplay.value = total.toFixed(2);
+            }
+        }
+        
+        // Add event listeners to existing product selects
+        document.querySelectorAll('.product-select').forEach(select => {
+            // Auto-fill price when product is selected
+            select.addEventListener('change', function() {
+                const productId = this.value;
+                // More robust way to find the unit price input
+                const itemForm = this.closest('.item-form');
+                if (itemForm) {
+                    const priceInput = itemForm.querySelector('.unit-price-input');
+                    if (priceInput) {
+                        getProductPrice(productId, priceInput);
+                    }
+                }
+            });
+        });
+        
+        // Add event listeners to quantity and price inputs for real-time calculation
+        document.querySelectorAll('input[name$="quantity"], input[name$="unit_price"]').forEach(input => {
+            input.addEventListener('input', function() {
+                calculateTotal(this);
+            });
+        });
+        
+        // Add item functionality
+        document.getElementById('add-item').addEventListener('click', function() {
+            const formset = document.querySelectorAll('.item-form');
+            const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+            const formNum = formset.length;
+            const newForm = formset[0].cloneNode(true);
+            
+            // Clear values in the new form
+            const inputs = newForm.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+                
+                // Update the 'name' and 'id' attributes
+                if (input.name) {
+                    input.name = input.name.replace('-0-', `-${formNum}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace('-0-', `-${formNum}-`);
+                }
+            });
+            
+            // Update the form index
+            newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formNum);
+            
+            // Add event listener to the new product select
+            const newSelect = newForm.querySelector('.product-select');
+            if (newSelect) {
+                newSelect.addEventListener('change', function() {
+                    const productId = this.value;
+                    // More robust way to find the unit price input
+                    const itemForm = this.closest('.item-form');
+                    if (itemForm) {
+                        const priceInput = itemForm.querySelector('.unit-price-input');
+                        if (priceInput) {
+                            getProductPrice(productId, priceInput);
+                        }
+                    }
+                });
+            }
+            
+            // Add event listeners to new quantity and price inputs
+            const newQuantityInput = newForm.querySelector('input[name$="quantity"]');
+            const newPriceInput = newForm.querySelector('input[name$="unit_price"]');
+            if (newQuantityInput) {
+                newQuantityInput.addEventListener('input', function() {
+                    calculateTotal(this);
+                });
+            }
+            if (newPriceInput) {
+                newPriceInput.addEventListener('input', function() {
+                    calculateTotal(this);
+                });
+            }
+            
+            // Insert the new form before the add button
+            document.querySelector('.card-body').insertBefore(newForm, this);
+            
+            // Update the total forms count
+            totalForms.value = formNum + 1;
+        });
+        
+        // Remove item functionality
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-item')) {
+                const form = e.target.closest('.item-form');
+                if (form) {
+                    form.remove();
+                    // Update the total forms count
+                    const formset = document.querySelectorAll('.item-form');
+                    const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+                    totalForms.value = formset.length;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

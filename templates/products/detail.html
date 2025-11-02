@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Details - Inventory Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Product image continuous rotation effect with dynamic shadows */
+.product-image-container {
+    perspective: 1000px;
+    margin: 0 auto;
+    width: fit-content;
+    position: relative;
+}
+
+.product-image-3d {
+    width: 100%;
+    height: auto;
+    transform-style: preserve-3d;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    display: block;
+    animation: rotate3d 20s infinite linear;
+    transition: box-shadow 0.3s ease;
+}
+
+@keyframes rotate3d {
+    0% {
+        transform: rotateY(0deg) rotateX(5deg);
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+    25% {
+        transform: rotateY(90deg) rotateX(-5deg);
+        box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+    }
+    50% {
+        transform: rotateY(180deg) rotateX(5deg);
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    }
+    75% {
+        transform: rotateY(270deg) rotateX(-5deg);
+        box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
+    }
+    100% {
+        transform: rotateY(360deg) rotateX(5deg);
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+}
+
+/* Add a glowing effect container */
+.product-image-container::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    border-radius: 15px;
+    background: linear-gradient(45deg, 
+        rgba(52, 152, 219, 0.1),
+        rgba(155, 89, 182, 0.1),
+        rgba(231, 76, 60, 0.1),
+        rgba(241, 196, 15, 0.1));
+    z-index: -1;
+    animation: glow 4s infinite linear;
+    opacity: 0.5;
+}
+
+@keyframes glow {
+    0% {
+        background: linear-gradient(45deg, 
+            rgba(52, 152, 219, 0.1),
+            rgba(155, 89, 182, 0.1),
+            rgba(231, 76, 60, 0.1),
+            rgba(241, 196, 15, 0.1));
+    }
+    25% {
+        background: linear-gradient(45deg, 
+            rgba(155, 89, 182, 0.1),
+            rgba(231, 76, 60, 0.1),
+            rgba(241, 196, 15, 0.1),
+            rgba(52, 152, 219, 0.1));
+    }
+    50% {
+        background: linear-gradient(45deg, 
+            rgba(231, 76, 60, 0.1),
+            rgba(241, 196, 15, 0.1),
+            rgba(52, 152, 219, 0.1),
+            rgba(155, 89, 182, 0.1));
+    }
+    75% {
+        background: linear-gradient(45deg, 
+            rgba(241, 196, 15, 0.1),
+            rgba(52, 152, 219, 0.1),
+            rgba(155, 89, 182, 0.1),
+            rgba(231, 76, 60, 0.1));
+    }
+    100% {
+        background: linear-gradient(45deg, 
+            rgba(52, 152, 219, 0.1),
+            rgba(155, 89, 182, 0.1),
+            rgba(231, 76, 60, 0.1),
+            rgba(241, 196, 15, 0.1));
+    }
+}
+
+/* Pause rotation and glow on hover for better viewing */
+.product-image-container:hover .product-image-3d {
+    animation-play-state: paused;
+}
+
+.product-image-container:hover::before {
+    animation-play-state: paused;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Product Details</h2>
+    <div>
+        <a href="{% url 'products:update' product.pk %}" class="btn btn-warning me-2">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'products:delete' product.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Product Image</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if product.image %}
+                    <div class="product-image-container">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid product-image-3d">
+                    </div>
+                {% else %}
+                    <div class="bg-light p-5 rounded">
+                        <i class="fas fa-box fa-3x text-muted"></i>
+                        <p class="mt-2 text-muted">No image available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Barcode Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Barcode</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if product.barcode %}
+                    <!-- Display barcode image if available -->
+                    <div class="mb-3">
+                        <img src="{{ MEDIA_URL }}barcodes/barcode_{{ product.pk }}.png" alt="Barcode for {{ product.name }}" class="img-fluid" style="max-height: 120px;">
+                    </div>
+                    <div class="mb-2">
+                        <strong>Barcode Number:</strong><br>
+                        <code>{{ product.barcode }}</code>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Format:</strong><br>
+                        <span class="badge bg-info">{{ product.get_barcode_format_display }}</span>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ MEDIA_URL }}barcodes/barcode_{{ product.pk }}.png" download="barcode_{{ product.sku }}.png" class="btn btn-sm btn-primary">
+                            <i class="fas fa-download"></i> Download Barcode
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No barcode available for this product.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Product Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th>Name:</th>
+                                <td>{{ product.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>SKU:</th>
+                                <td>{{ product.sku }}</td>
+                            </tr>
+                            <tr>
+                                <th>Category:</th>
+                                <td>{{ product.category.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Unit:</th>
+                                <td>{{ product.unit.name }} ({{ product.unit.symbol }})</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th>Quantity:</th>
+                                <td>{{ product.quantity }}</td>
+                            </tr>
+                            <tr>
+                                <th>Cost Price:</th>
+                                <td>{{ business_settings.currency_symbol }} {{ product.cost_price }}</td>
+                            </tr>
+                            <tr>
+                                <th>Selling Price:</th>
+                                <td>{{ business_settings.currency_symbol }} {{ product.selling_price }}</td>
+                            </tr>
+                            <tr>
+                                <th>Profit Margin:</th>
+                                <td>{{ product.profit_margin|floatformat:2 }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Profit Per Unit:</th>
+                                <td>{{ business_settings.currency_symbol }} {{ product.profit_per_unit|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Profit (Current Stock):</th>
+                                <td>{{ business_settings.currency_symbol }} {{ product.total_profit|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expiry Date:</th>
+                                <td>{{ product.expiry_date|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    {% if product.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                {% if product.description %}
+                <div class="mt-4">
+                    <h5>Description</h5>
+                    <p>{{ product.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

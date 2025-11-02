@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Quick Report - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Quick {{ period|title }} Report</h2>
+    <div>
+        <a href="?export=csv" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export CSV
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>Report Period: {{ start_date|date:"M d, Y" }} - {{ end_date|date:"M d, Y" }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Sales</h5>
+                <h2>{{ business_settings.currency_symbol }}{{ total_sales|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Total Orders</h5>
+                <h2>{{ total_orders }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Gross Profit</h5>
+                <h2>{{ business_settings.currency_symbol }}{{ gross_profit|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Net Profit</h5>
+                <h2>{{ business_settings.currency_symbol }}{{ net_profit|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Top Selling Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_products %}
+                            <tr>
+                                <td>{{ item.product__name }}</td>
+                                <td>{{ item.total_sold }}</td>
+                                <td>{{ business_settings.currency_symbol }}{{ item.total_revenue|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No sales data available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Financial Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Sales Revenue</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ total_sales|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Cost of Goods Sold</th>
+                                <td class="text-end">({{ business_settings.currency_symbol }} {{ gross_profit|floatformat:2 }})</td>
+                            </tr>
+                            <tr class="table-info">
+                                <th>Gross Profit</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ gross_profit|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Operating Expenses</th>
+                                <td class="text-end">({{ business_settings.currency_symbol }} {{ total_expenses|floatformat:2 }})</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <th>Net Profit</th>
+                                <td class="text-end">{{ business_settings.currency_symbol }} {{ net_profit|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations Section -->
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Business Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% if recommendations %}
+                    <div class="accordion" id="recommendationsAccordion">
+                        {% for rec in recommendations %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                    <button class="accordion-button {% if forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                                        <span class="badge bg-{% if rec.priority == 'high' %}danger{% elif rec.priority == 'medium' %}warning{% elif rec.priority == 'low' %}info{% else %}success{% endif %} me-2">
+                                            {{ rec.priority|upper }}
+                                        </span>
+                                        {{ rec.title }}
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#recommendationsAccordion">
+                                    <div class="accordion-body">
+                                        <p><strong>Category:</strong> {{ rec.type|title }}</p>
+                                        <p>{{ rec.description }}</p>
+                                        <p><strong>Suggested Action:</strong> {{ rec.action }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">No specific recommendations at this time.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

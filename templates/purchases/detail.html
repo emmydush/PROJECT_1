@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Purchase Order Details - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Purchase Order Details</h2>
+    <div>
+        {% if purchase_order.status == 'pending' %}
+        <a href="{% url 'purchases:receive_items' purchase_order.pk %}" class="btn btn-success me-2">
+            <i class="fas fa-truck"></i> Receive Items
+        </a>
+        {% endif %}
+        <a href="{% url 'purchases:update' purchase_order.pk %}" class="btn btn-warning me-2">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'purchases:delete' purchase_order.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>PO Number:</strong> PO-{{ purchase_order.pk }}</p>
+                        <p><strong>Supplier:</strong> {{ purchase_order.supplier.name }}</p>
+                        <p><strong>Order Date:</strong> {{ purchase_order.order_date|date:"M d, Y" }}</p>
+                        <p><strong>Expected Delivery:</strong> {{ purchase_order.expected_delivery_date|date:"M d, Y"|default:"N/A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> 
+                            {% if purchase_order.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif purchase_order.status == 'received' %}
+                                <span class="badge bg-success">Received</span>
+                            {% elif purchase_order.status == 'partially_received' %}
+                                <span class="badge bg-info">Partially Received</span>
+                            {% elif purchase_order.status == 'cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Total Amount:</strong> {{ business_settings.currency_symbol }} {{ purchase_order.total_amount }}</p>
+                        <p><strong>Created:</strong> {{ purchase_order.created_at|date:"M d, Y H:i" }}</p>
+                        <p><strong>Last Updated:</strong> {{ purchase_order.updated_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Notes:</strong>
+                    <p class="mt-2">{{ purchase_order.notes|default:"N/A" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Supplier Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ purchase_order.supplier.name }}</p>
+                <p><strong>Email:</strong> {{ purchase_order.supplier.email|default:"N/A" }}</p>
+                <p><strong>Phone:</strong> {{ purchase_order.supplier.phone|default:"N/A" }}</p>
+                <p><strong>Address:</strong> {{ purchase_order.supplier.address|default:"N/A" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+                                <th>Received</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in purchase_order.purchaseitem_set.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ business_settings.currency_symbol }} {{ item.unit_price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ business_settings.currency_symbol }} {{ item.total_price }}</td>
+                                <td>{{ item.received_quantity }}</td>
+                                <td>
+                                    {% if item.received_quantity == 0 %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif item.received_quantity < item.quantity %}
+                                        <span class="badge bg-info">Partially Received</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Received</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No items found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Total</th>
+                                <th>{{ business_settings.currency_symbol }} {{ purchase_order.total_amount }}</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

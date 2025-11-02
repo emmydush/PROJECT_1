@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Receive Items - Purchase Order #{{ purchase_order.pk }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-box-open"></i> Receive Items - PO #{{ purchase_order.pk }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Ordered</th>
+                                    <th>Received</th>
+                                    <th>Pending</th>
+                                    <th>Receive Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in purchase_order.items.all %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }} {{ item.product.unit.symbol }}</td>
+                                    <td>{{ item.received_quantity }} {{ item.product.unit.symbol }}</td>
+                                    <td>{{ item.pending_quantity }} {{ item.product.unit.symbol }}</td>
+                                    <td>
+                                        <input type="number" 
+                                               name="received_{{ item.pk }}" 
+                                               min="0" 
+                                               max="{{ item.pending_quantity }}" 
+                                               step="0.01" 
+                                               class="form-control" 
+                                               placeholder="0">
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No items found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="btn btn-success">Receive Items</button>
+                    <a href="{% url 'purchases:detail' purchase_order.pk %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

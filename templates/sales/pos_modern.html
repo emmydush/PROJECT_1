@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Point of Sale - Smart Solution{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pos.css' %}">
+<style>
+/* Modern notification animations */
+@keyframes fadeInDown {
+    from {
+        transform: translate3d(0, -100%, 0);
+        opacity: 0;
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+    }
+    to {
+        transform: translate3d(0, -100%, 0);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Scanner animation */
+@keyframes scannerPulse {
+    0% {
+        border-color: rgba(0, 255, 0, 0.8);
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+    }
+    50% {
+        border-color: rgba(0, 255, 0, 1);
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4);
+    }
+    100% {
+        border-color: rgba(0, 255, 0, 0.8);
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* Modern notification styles */
+.notification {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.notification .notification-message {
+    flex: 1;
+    padding-right: 10px;
+}
+
+.notification .btn-close {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.notification .btn-close:hover {
+    opacity: 1;
+}
+
+/* Button animations */
+.btn-animating {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-container">
+    <!-- Hidden CSRF token for JavaScript access -->
+    {% csrf_token %}
+    
+    <!-- Header with business info and controls -->
+    <div class="pos-header">
+        <div class="business-info">
+            <h1>Point of Sale</h1>
+            <p class="text-muted">Smart Solution - Intelligent. Efficient. Simplified.</p>
+        </div>
+        <div class="pos-controls">
+            <button id="toggleTheme" class="btn btn-outline-secondary" title="Toggle Dark/Light Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="clearCart" class="btn btn-outline-danger" title="Clear Cart">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Main POS Interface -->
+    <div class="pos-main">
+        <!-- Left Panel - Cart and Controls -->
+        <div class="pos-left-panel">
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs" id="posTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+                        <i class="fas fa-box"></i> Products
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="customer-tab" data-bs-toggle="tab" data-bs-target="#customer" type="button" role="tab">
+                        <i class="fas fa-user"></i> Customer
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">
+                        <i class="fas fa-credit-card"></i> Payment
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="confirm-tab" data-bs-toggle="tab" data-bs-target="#confirm" type="button" role="tab">
+                        <i class="fas fa-check"></i> Confirm
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="posTabContent">
+                <!-- Products Tab -->
+                <div class="tab-pane fade show active" id="products" role="tabpanel">
+                    <div class="pos-search-section">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="productSearch" placeholder="Search products or scan barcode... (Enter barcode manually or Ctrl+B for scanner)" autocomplete="off">
+                            <button class="btn btn-outline-secondary" type="button" id="scanButton" title="Scan Barcode (Ctrl+B)">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">Scanner automatically stops after detecting a barcode</small>
+                        </div>
+                        <div id="productSuggestions" class="product-suggestions"></div>
+                    </div>
+                    
+                    <div class="pos-products-grid" id="productsGrid">
+                        {% for product in products %}
+                        <div class="product-card" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.selling_price }}" data-product-stock="{{ product.quantity }}">
+                            <div class="product-image">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                    <i class="fas fa-box"></i>
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <h6>{{ product.name }}</h6>
+                                <p class="product-price">{{ business_settings.currency_symbol }}{{ product.selling_price }}</p>
+                                <p class="product-stock">{{ product.quantity }} {{ product.unit.symbol }} left</p>
+                            </div>
+                            <button class="add-to-cart-btn btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        {% empty %}
+                        <div class="no-products">No products available</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Customer Tab -->
+                <div class="tab-pane fade" id="customer" role="tabpanel">
+                    <div class="customer-selection">
+                        <div class="mb-3">
+                            <label for="customerSelect" class="form-label">Select Customer</label>
+                            <select class="form-select" id="customerSelect">
+                                <option value="">Walk-in Customer</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}">{{ customer.full_name }}{% if customer.phone %} ({{ customer.phone }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="customer-info" id="customerInfo" style="display: none;">
+                            <!-- Customer details will be shown here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Tab -->
+                <div class="tab-pane fade" id="payment" role="tabpanel">
+                    <div class="payment-methods">
+                        <h5>Payment Method</h5>
+                        <div class="payment-options">
+                            <div class="payment-option active" data-method="cash">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Cash</span>
+                            </div>
+                            <div class="payment-option" data-method="credit_card">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Credit Card</span>
+                            </div>
+                            <div class="payment-option" data-method="mobile_money">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Mobile Money</span>
+                            </div>
+                            <div class="payment-option" data-method="bank_transfer">
+                                <i class="fas fa-university"></i>
+                                <span>Bank Transfer</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label for="discountInput" class="form-label">Discount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ business_settings.currency_symbol }}</span>
+                                <input type="number" class="form-control" id="discountInput" placeholder="0.00" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirm Tab -->
+                <div class="tab-pane fade" id="confirm" role="tabpanel">
+                    <div class="order-summary">
+                        <h5>Order Summary</h5>
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span id="summarySubtotal">{{ business_settings.currency_symbol }}0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax:</span>
+                                <span id="summaryTax">{{ business_settings.currency_symbol }}0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Discount:</span>
+                                <span id="summaryDiscount">{{ business_settings.currency_symbol }}0.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span id="summaryTotal">{{ business_settings.currency_symbol }}0.00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button id="processSale" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-cash-register"></i> Process Sale
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Cart -->
+        <div class="pos-right-panel">
+            <div class="cart-header">
+                <h4>Shopping Cart</h4>
+                <span class="badge bg-primary" id="cartItemCount">0 items</span>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be added here -->
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                    <p>Your cart is empty</p>
+                </div>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">{{ business_settings.currency_symbol }}0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax:</span>
+                        <span id="cartTax">{{ business_settings.currency_symbol }}0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Discount:</span>
+                        <span id="cartDiscount">{{ business_settings.currency_symbol }}0.00</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Total:</span>
+                        <span id="cartTotal">{{ business_settings.currency_symbol }}0.00</span>
+                    </div>
+                </div>
+                <button id="checkoutButton" class="btn btn-primary btn-lg w-100" disabled>
+                    <i class="fas fa-cash-register"></i> Checkout (Enter)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scanner Modal -->
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scannerModalLabel">Scan Barcode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="scannerContainer" style="position: relative; width: 100%; height: 300px; border: 2px solid #007bff; border-radius: 8px; overflow: hidden;">
+                    <video id="scannerVideo" style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    <div id="scannerOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 20%; border: 3px solid rgba(0, 255, 0, 0.8); box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5); animation: scannerPulse 2s infinite;"></div>
+                    </div>
+                </div>
+                <div id="scannerStatus" class="mt-2 alert alert-info">Scanner not started. Make sure to allow camera access when prompted.<br>
+                <small>Scan multiple items continuously. Click "Stop Scanner" when finished.</small></div>
+            </div>
+            <div class="modal-footer">
+                <!-- Manual Controls -->
+                <button type="button" class="btn btn-sm btn-warning" id="toggleAutoStop" onclick="window.posSystem.toggleAutoStop()">
+                    <i class="fas fa-play"></i> Auto-Stop: OFF
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" id="manualStopScanner" onclick="window.posSystem.manuallyStopScanner()">
+                    <i class="fas fa-power-off"></i> Stop Scanner
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Processing...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/quagga.min.js' %}"></script>
+<script src="{% static 'js/pos.js' %}"></script>
+<script src="{% static 'js/cart.js' %}"></script>
+<script>
+// Make business settings available to JavaScript by extracting from DOM elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Get currency symbol from any element that uses it
+    const currencyElement = document.querySelector('.product-price, #cartSubtotal, #summarySubtotal');
+    if (currencyElement) {
+        const currencyText = currencyElement.textContent;
+        const currencySymbol = currencyText.match(/^[^\d.]*/)?.[0] || '$';
+        window.business_settings = {
+            currency_symbol: currencySymbol,
+            tax_rate: 0  // Default value
+        };
+    } else {
+        // Fallback
+        window.business_settings = {
+            currency_symbol: '$',
+            tax_rate: 0
+        };
+    }
+    
+    // Initialize only one system to prevent duplicate processing
+    // Based on the template structure, we'll use the POS system for full functionality
+    if (typeof POSSystem !== 'undefined') {
+        window.posSystem = new POSSystem();
+        console.log('POSSystem initialized');
+    }
+    
+    // Do not initialize ModernCartSystem to prevent event duplication
+    // Only initialize if POS system is not available as fallback
+    // if (typeof ModernCartSystem !== 'undefined' && typeof window.posSystem === 'undefined') {
+    //     window.modernCartSystem = new ModernCartSystem();
+    //     console.log('ModernCartSystem initialized');
+    // }
+});
+</script>
+{% endblock %}
+</body>
+</html>

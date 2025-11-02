@@ -1,0 +1,23 @@
+{{ business_name }} - Low Stock Alert
+=====================================
+
+Hello Admin,
+
+This is an automated alert to inform you that the following products are low on stock as of {{ today }}:
+
+{% if low_stock_products %}
+Product Name | SKU | Current Quantity | Reorder Level
+-------------|-----|------------------|---------------
+{% for product in low_stock_products %}{{ product.name }} | {{ product.sku }} | {{ product.quantity }} | {{ product.reorder_level }}
+{% endfor %}
+
+ACTION REQUIRED: Please review these low stock products and consider reordering soon.
+{% else %}
+No low stock products found.
+{% endif %}
+
+Thank you,
+{{ business_name }} Inventory Management System
+
+---
+This is an automated message. Please do not reply to this email.

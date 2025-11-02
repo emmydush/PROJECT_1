@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Report - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Inventory Report</h2>
+    <div>
+        <a href="?export=csv" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export CSV
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- Inventory Summary Charts -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-boxes"></i> Top Products by Stock Level</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="stockLevelChart" height="100" aria-label="Stock level chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Top Selling Products</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="productPerformanceChart" height="100" aria-label="Product performance chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="inventoryTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="low-stock-tab" data-bs-toggle="tab" data-bs-target="#low-stock" type="button" role="tab">
+            Low Stock
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="out-of-stock-tab" data-bs-toggle="tab" data-bs-target="#out-of-stock" type="button" role="tab">
+            Out of Stock
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab">
+            Expired
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="near-expiry-tab" data-bs-toggle="tab" data-bs-target="#near-expiry" type="button" role="tab">
+            Near Expiry
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="inventoryTabContent">
+    <div class="tab-pane fade show active" id="low-stock" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5>Low Stock Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Current Stock</th>
+                                <th>Reorder Level</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.reorder_level }}</td>
+                                <td>{{ product.unit.symbol }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No low stock products.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="out-of-stock" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5>Out of Stock Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in out_of_stock_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.updated_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No out of stock products.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="expired" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5>Expired Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Expiry Date</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in expired_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.expiry_date|date:"M d, Y" }}</td>
+                                <td>{{ product.quantity }} {{ product.unit.symbol }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No expired products.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="near-expiry" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5>Near Expiry Products (Within 30 Days)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Expiry Date</th>
+                                <th>Days Remaining</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in near_expiry_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.expiry_date|date:"M d, Y" }}</td>
+                                <td>
+                                    {% with days_remaining=product.expiry_date|timesince:today %}
+                                        {{ days_remaining.days }} days
+                                    {% endwith %}
+                                </td>
+                                <td>{{ product.quantity }} {{ product.unit.symbol }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No products nearing expiry.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Parse JSON data
+    const stockProductNames = JSON.parse('{{ stock_product_names_json|escapejs }}');
+    const stockProductQuantities = JSON.parse('{{ stock_product_quantities_json|escapejs }}');
+    const performanceProductNames = JSON.parse('{{ performance_product_names_json|escapejs }}');
+    const performanceProductQuantities = JSON.parse('{{ performance_product_quantities_json|escapejs }}');
+    
+    // Stock Level Chart
+    const stockCtx = document.getElementById('stockLevelChart').getContext('2d');
+    if (stockCtx) {
+        const stockChart = new Chart(stockCtx, {
+            type: 'bar',
+            data: {
+                labels: stockProductNames,
+                datasets: [{
+                    label: 'Quantity in Stock',
+                    data: stockProductQuantities,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)', // Red with opacity
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+    
+    // Product Performance Chart
+    const performanceCtx = document.getElementById('productPerformanceChart').getContext('2d');
+    if (performanceCtx) {
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'bar',
+            data: {
+                labels: performanceProductNames,
+                datasets: [{
+                    label: 'Units Sold (Last 30 Days)',
+                    data: performanceProductQuantities,
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)', // Teal with opacity
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

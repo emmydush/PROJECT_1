@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Business Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        .card-primary { border-top: 4px solid #007bff; }
+        .card-success { border-top: 4px solid #28a745; }
+        .card-info { border-top: 4px solid #17a2b8; }
+        .card-warning { border-top: 4px solid #ffc107; }
+        .card h3 { margin: 0 0 10px 0; font-size: 16px; }
+        .card .value { font-size: 24px; font-weight: bold; margin: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .recommendations {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .recommendation-item {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .priority-high { border-left: 4px solid #dc3545; }
+        .priority-medium { border-left: 4px solid #ffc107; }
+        .priority-low { border-left: 4px solid #17a2b8; }
+        .priority-positive { border-left: 4px solid #28a745; }
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-high { background-color: #dc3545; }
+        .badge-medium { background-color: #ffc107; color: #000; }
+        .badge-low { background-color: #17a2b8; }
+        .badge-positive { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Daily Business Report</h1>
+        <h2>{{ business.company_name }}</h2>
+        <p>Report Period: {{ report.start_date }} to {{ report.end_date }}</p>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card card-primary">
+            <h3>Total Sales</h3>
+            <p class="value">{{ business.currency_symbol }}{{ report.total_sales|floatformat:2 }}</p>
+        </div>
+        <div class="card card-success">
+            <h3>Total Orders</h3>
+            <p class="value">{{ report.total_orders }}</p>
+        </div>
+        <div class="card card-info">
+            <h3>Gross Profit</h3>
+            <p class="value">{{ business.currency_symbol }}{{ report.gross_profit|floatformat:2 }}</p>
+        </div>
+        <div class="card card-warning">
+            <h3>Net Profit</h3>
+            <p class="value">{{ business.currency_symbol }}{{ report.net_profit|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <h3>Top Selling Products</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity Sold</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in report.top_products %}
+            <tr>
+                <td>{{ item.product__name }}</td>
+                <td>{{ item.total_sold }}</td>
+                <td>{{ business.currency_symbol }}{{ item.total_revenue|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No sales data available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="recommendations">
+        <h3>Business Recommendations</h3>
+        {% for rec in report.recommendations %}
+        <div class="recommendation-item priority-{{ rec.priority }}">
+            <span class="priority-badge badge-{{ rec.priority }}">
+                {{ rec.priority|upper }}
+            </span>
+            <h4>{{ rec.title }}</h4>
+            <p><strong>Category:</strong> {{ rec.type|title }}</p>
+            <p>{{ rec.description }}</p>
+            <p><strong>Suggested Action:</strong> {{ rec.action }}</p>
+        </div>
+        {% empty %}
+        <p>No specific recommendations at this time.</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+    <p><small>This report was automatically generated on {{ report.end_date }}. For detailed analysis, please refer to the attached CSV file.</small></p>
+</body>
+</html>

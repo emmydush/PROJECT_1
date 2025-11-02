@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Expired Products Alert</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .product-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .product-table th, .product-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .product-table th { background-color: #f8f9fa; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ business_name }}</h1>
+        <h2>Expired Products Alert</h2>
+    </div>
+    
+    <div class="content">
+        <p>Hello Admin,</p>
+        
+        <p>This is an automated alert to inform you that the following products have expired as of {{ today }}:</p>
+        
+        {% if expired_products %}
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>SKU</th>
+                    <th>Expiry Date</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in expired_products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.expiry_date }}</td>
+                    <td>{{ product.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <p><strong>Action Required:</strong> Please review these expired products and take appropriate action (e.g., remove from inventory, return to supplier, etc.).</p>
+        {% else %}
+        <p>No expired products found.</p>
+        {% endif %}
+        
+        <p>Thank you,<br>
+        {{ business_name }} Inventory Management System</p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>

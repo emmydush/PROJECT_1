@@ -1,0 +1,23 @@
+{{ business_name }} - Near Expiry Products Alert
+================================================
+
+Hello Admin,
+
+This is an automated alert to inform you that the following products will expire within {{ days_threshold }} days from today ({{ today }}):
+
+{% if near_expiry_products %}
+Product Name | SKU | Expiry Date | Days Until Expiry | Quantity
+-------------|-----|-------------|-------------------|----------
+{% for product in near_expiry_products %}{{ product.name }} | {{ product.sku }} | {{ product.expiry_date }} | {{ product.expiry_date|timesince:today }} | {{ product.quantity }}
+{% endfor %}
+
+ACTION REQUIRED: Please review these near expiry products and take appropriate action (e.g., discount pricing, priority sales, etc.).
+{% else %}
+No near expiry products found.
+{% endif %}
+
+Thank you,
+{{ business_name }} Inventory Management System
+
+---
+This is an automated message. Please do not reply to this email.

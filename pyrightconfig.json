@@ -1,0 +1,21 @@
+{
+    "include": [
+        "**/*.py"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "venv",
+        ".git"
+    ],
+    "pythonVersion": "3.8",
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
+    "reportUnknownMemberType": false,
+    "reportUnknownVariableType": false,
+    "reportUnknownArgumentType": false,
+    "reportAttributeAccessIssue": false,
+    "reportOperatorIssue": false
+}

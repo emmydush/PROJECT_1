@@ -1,0 +1,139 @@
+{% extends 'authentication/base_auth.html' %}
+
+{% block title %}Create Business - {{ business_settings.business_name }}{% endblock %}
+
+{% block content %}
+<!-- Beautiful Header -->
+<div class="container-fluid bg-success text-white py-3 mb-0">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    {% if business_settings.business_logo %}
+                        <img src="{{ business_settings.business_logo.url }}" alt="{{ business_settings.business_name }} Logo" class="me-3" style="max-height: 40px; width: auto;">
+                    {% endif %}
+                    <div>
+                        <h1 class="h3 fw-bold mb-1">
+                            {{ business_settings.business_name }}
+                        </h1>
+                        <p class="mb-0 small">Intelligent. Efficient. Simplified.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-flex justify-content-md-end align-items-center gap-2">
+                    <!-- Language Selector -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>
+                            <span class="d-none d-sm-inline">Language</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="#" data-lang="en">English</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="es">Español</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="fr">Français</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="de">Deutsch</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Theme Toggle Button -->
+                    <div class="theme-toggle-container">
+                        <button id="themeToggle" class="theme-toggle btn btn-sm btn-outline-light" aria-label="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Business Creation Form Container -->
+<div class="container d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 120px);">
+    <div class="card shadow-lg rounded-4 border-0" style="width: 100%; max-width: 500px;">
+        <div class="card-body p-4">
+            <h2 class="fw-bold mb-3 h4 text-center"><i class="fas fa-building me-2"></i>Create Your Business</h2>
+            <p class="text-center text-muted mb-4">Please provide details about your business to get started.</p>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="company_name" class="form-label small">Company Name *</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label small">Business Email *</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-pill mb-3">
+                    Create Business
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p class="mb-0 small text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    You can update these details later in your business settings.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom styles for the header -->
+<style>
+    .theme-toggle, .dropdown-toggle {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover, .dropdown-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .theme-toggle i {
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+    }
+</style>
+
+<!-- JavaScript for language switching -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language switching functionality
+        const languageItems = document.querySelectorAll('[data-lang]');
+        languageItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedLang = this.getAttribute('data-lang');
+                // In a real implementation, this would send a request to change the language
+                // For now, we'll just show an alert
+                alert(`Language would be changed to: ${this.textContent}`);
+                // Update the dropdown button text to show current language
+                const dropdownToggle = document.querySelector('#languageDropdown');
+                dropdownToggle.innerHTML = `<i class="fas fa-globe me-1"></i><span class="d-none d-sm-inline">${this.textContent}</span>`;
+            });
+        });
+    });
+</script>
+{% endblock %}

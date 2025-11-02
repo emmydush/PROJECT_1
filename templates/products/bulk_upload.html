@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Upload Products - Smart Solution{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Bulk Upload Products</h2>
+    <a href="{% url 'products:list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Upload CSV File</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv">
+                        <div class="form-text">
+                            <p class="mb-1">CSV file should contain the following columns in order:</p>
+                            <ul>
+                                <li>Name</li>
+                                <li>SKU (Stock Keeping Unit)</li>
+                                <li>Barcode (optional)</li>
+                                <li>Category Name</li>
+                                <li>Unit Name</li>
+                                <li>Description (optional)</li>
+                                <li>Cost Price</li>
+                                <li>Selling Price</li>
+                                <li>Quantity</li>
+                                <li>Reorder Level</li>
+                                <li>Expiry Date (optional, format: YYYY-MM-DD)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Products
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Download Template</h5>
+            </div>
+            <div class="card-body">
+                <p>Download our CSV template to ensure your file is formatted correctly.</p>
+                <a href="{% url 'products:download_template' %}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download CSV Template
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>How It Works</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Download the CSV template</li>
+                    <li>Fill in your product information</li>
+                    <li>Save the file as CSV</li>
+                    <li>Upload using the form on the left</li>
+                    <li>Review the results in the product list</li>
+                </ol>
+                <p class="mb-0"><strong>Note:</strong> Existing products with matching SKUs will be updated.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
