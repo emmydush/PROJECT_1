@@ -28,6 +28,7 @@
                                     <th>Role</th>
                                     <th>Phone</th>
                                     <th>Date Joined</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -43,14 +44,33 @@
                                     <td>{{ user.phone|default:"-" }}</td>
                                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
                                     <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
                                         <a href="{% url 'authentication:edit_user' user.id %}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        {% if user.is_active %}
+                                            <a href="{% url 'authentication:deactivate_user' user.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                                <i class="fas fa-user-slash"></i> Deactivate
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'authentication:activate_user' user.id %}" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this user?')">
+                                                <i class="fas fa-user-check"></i> Activate
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'authentication:reset_user_password' user.id %}" class="btn btn-sm btn-info" onclick="return confirm('Are you sure you want to reset this user\'s password?')">
+                                            <i class="fas fa-key"></i> Reset Password
                                         </a>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9" class="text-center">No users found.</td>
+                                    <td colspan="10" class="text-center">No users found.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

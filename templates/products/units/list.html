@@ -29,10 +29,10 @@
                         <td>{{ unit.symbol }}</td>
                         <td>{{ unit.created_at|date:"M d, Y" }}</td>
                         <td>
-                            <a href="#" class="btn btn-sm btn-warning">
+                            <a href="{% url 'products:unit_update' unit.pk %}" class="btn btn-sm btn-warning">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="#" class="btn btn-sm btn-danger">
+                            <a href="{% url 'products:unit_delete' unit.pk %}" class="btn btn-sm btn-danger">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>

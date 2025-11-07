@@ -6,15 +6,19 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Create admin user
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_user(
-                username='admin',
-                email='admin@example.com',
-                password='admin123',
-                first_name='Admin',
+        if not User.objects.filter(username='emmanuel').exists():
+            user = User.objects.create_user(
+                username='emmanuel',
+                email='emmanuel@example.com',
+                password='Jesus@12',
+                first_name='Emmanuel',
                 last_name='User',
                 role='admin'
             )
+            # Ensure the admin user is also a staff member and superuser
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
             self.stdout.write(self.style.SUCCESS('Successfully created admin user'))
 
         # Create manager user

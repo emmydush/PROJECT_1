@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from products.models import Product
 from sales.models import Sale
@@ -7,8 +7,9 @@ from purchases.models import PurchaseOrder
 from expenses.models import Expense
 from django.db.models import Sum, Count, F
 from decimal import Decimal
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.middleware import set_current_business  # Import the middleware function
+from settings.models import BusinessSettings
 import logging
 
 # Set up logging
@@ -29,6 +30,7 @@ def dashboard_view(request):
         except Business.DoesNotExist:
             # If the business doesn't exist, remove it from session
             logger.warning("Business not found in session, removing from session")
+            del request.session['current_branch_id']  # Fix: Remove current_branch_id instead
             del request.session['current_business_id']
             current_business = None
     else:
@@ -55,13 +57,35 @@ def dashboard_view(request):
         set_current_business(current_business)
         logger.info(f"Set current business in middleware: {current_business}")
     
-    # Get business-specific data using business_specific() manager
-    logger.info(f"Fetching business-specific data for business: {current_business}")
-    products = Product.objects.business_specific()
-    sales = Sale.objects.business_specific()
-    customers = Customer.objects.business_specific()
-    purchases = PurchaseOrder.objects.business_specific()
-    expenses = Expense.objects.business_specific()
+    # Check if there's a current branch in the session
+    current_branch = None
+    if 'current_branch_id' in request.session:
+        try:
+            current_branch = Branch.objects.get(id=request.session['current_branch_id'], business=current_business)
+            logger.info(f"Found branch in session: {current_branch}")
+        except Branch.DoesNotExist:
+            # If the branch doesn't exist, remove it from session
+            logger.warning("Branch not found in session, removing from session")
+            del request.session['current_branch_id']
+            current_branch = None
+    
+    # Get data - either business-wide or branch-specific
+    if current_branch:
+        # Get branch-specific data
+        logger.info(f"Fetching branch-specific data for branch: {current_branch}")
+        products = Product.objects.for_branch(current_branch)
+        sales = Sale.objects.for_branch(current_branch)
+        customers = Customer.objects.for_branch(current_branch)
+        purchases = PurchaseOrder.objects.for_branch(current_branch)
+        expenses = Expense.objects.for_branch(current_branch)
+    else:
+        # Get business-wide data
+        logger.info(f"Fetching business-wide data for business: {current_business}")
+        products = Product.objects.business_specific()
+        sales = Sale.objects.business_specific()
+        customers = Customer.objects.business_specific()
+        purchases = PurchaseOrder.objects.business_specific()
+        expenses = Expense.objects.business_specific()
     
     logger.info(f"Products count: {products.count()}")
     logger.info(f"Sales count: {sales.count()}")
@@ -95,10 +119,24 @@ def dashboard_view(request):
     today_profit = Decimal('0.00')
     today_sales_objects = today_sales_queryset
     for sale in today_sales_objects:
-        today_profit += sale.total_profit
-        logger.info(f"Sale {sale.id} profit: {sale.total_profit}")
+        today_profit += sale.total_amount  # Using total_amount instead of total_profit
+        logger.info(f"Sale {sale.id} amount: {sale.total_amount}")
     
     logger.info(f"Today's total profit: {today_profit}")
+    
+    # Get all branches for the current business for branch switching
+    branches = Branch.objects.filter(business=current_business, is_active=True)
+    
+    # Get business settings (singleton object)
+    try:
+        business_settings = BusinessSettings.objects.get(id=1)
+    except BusinessSettings.DoesNotExist:
+        # Create default settings if they don't exist
+        business_settings = BusinessSettings.objects.create(
+            id=1,
+            business_name=current_business.company_name,
+            business_email=current_business.email
+        )
     
     context = {
         'total_products': total_products,
@@ -111,6 +149,10 @@ def dashboard_view(request):
         'today_profit': today_profit,
         'low_stock_products': low_stock_products[:5],  # Limit to 5 for display
         'current_business': current_business,
+        'current_branch': current_branch,
+        'branches': branches,
+        'business': current_business,  # For compatibility with base template
+        'business_settings': business_settings,  # For compatibility with original template
     }
     
     logger.info(f"Context data: {context}")

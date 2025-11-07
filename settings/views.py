@@ -20,6 +20,9 @@ from .forms import BusinessSettingsForm, BarcodeSettingsForm, EmailSettingsForm,
 from authentication.models import User, UserThemePreference
 from authentication.forms import UserThemePreferenceForm
 
+# Add this import for the Business model
+from superadmin.models import Business
+
 def is_admin(user):
     return user.is_authenticated and user.role == 'admin'
 
@@ -49,26 +52,39 @@ def settings_list(request):
 @login_required
 @user_passes_test(can_access_settings)
 def business_settings(request):
-    business_settings, created = BusinessSettings.objects.get_or_create(id=1)
+    # Get the current business from middleware
+    from superadmin.middleware import get_current_business
+    current_business = get_current_business()
+    
+    if not current_business:
+        messages.error(request, 'No business context found.')
+        return redirect('dashboard:index')
+    
+    # Get or create business settings (for non-core business info like logo, currency, etc.)
+    business_settings_obj, created = BusinessSettings.objects.get_or_create(id=1)
     
     if request.method == 'POST':
-        form = BusinessSettingsForm(request.POST, request.FILES, instance=business_settings)
+        form = BusinessSettingsForm(request.POST, request.FILES, instance=business_settings_obj)
         if form.is_valid():
             # Handle logo deletion
-            if form.cleaned_data.get('delete_logo') and business_settings.business_logo:
+            if form.cleaned_data.get('delete_logo') and business_settings_obj.business_logo:
                 # Delete the logo file
-                if business_settings.business_logo and hasattr(business_settings.business_logo, 'delete'):
-                    business_settings.business_logo.delete(save=False)
+                if business_settings_obj.business_logo and hasattr(business_settings_obj.business_logo, 'delete'):
+                    business_settings_obj.business_logo.delete(save=False)
                 # Clear the logo field
-                business_settings.business_logo = None
+                business_settings_obj.business_logo = None
             
             form.save()
             messages.success(request, 'Business settings updated successfully!')
             return redirect('settings:business')
     else:
-        form = BusinessSettingsForm(instance=business_settings)
+        form = BusinessSettingsForm(instance=business_settings_obj)
     
-    return render(request, 'settings/business.html', {'form': form, 'settings': business_settings})
+    return render(request, 'settings/business.html', {
+        'form': form, 
+        'settings': business_settings_obj,
+        'business': current_business  # Pass the current business object
+    })
 
 @login_required
 @user_passes_test(can_access_settings)
@@ -355,3 +371,67 @@ def theme_settings(request):
         'form': form,
         'theme_preference': theme_preference
     })
+
+@login_required
+@admin_required
+def user_activity_logs(request):
+    # Get the current business from middleware
+    from superadmin.middleware import get_current_business
+    from superadmin.models import SystemLog, SecurityEvent, User
+    
+    current_business = get_current_business()
+    
+    if current_business:
+        # Get all users for this business
+        business_users = User.objects.filter(businesses=current_business)
+        
+        # Get system logs for users in this business
+        logs = SystemLog.objects.filter(
+            user__in=business_users
+        ).select_related('user').order_by('-timestamp')[:100]
+        
+        # Get security events for users in this business
+        security_events = SecurityEvent.objects.filter(
+            user__in=business_users
+        ).select_related('user').order_by('-timestamp')[:100]
+        
+        # Get login history for users in this business
+        login_events = SecurityEvent.objects.filter(
+            user__in=business_users,
+            event_type='login_attempt'
+        ).select_related('user').order_by('-timestamp')[:50]
+        
+        # Get suspicious activities for users in this business
+        suspicious_activities = SecurityEvent.objects.filter(
+            user__in=business_users,
+            event_type__in=['suspicious_activity', 'account_lockout', 'failed_logins', 'data_export', 'password_reset']
+        ).select_related('user').order_by('-timestamp')[:50]
+        
+        # Stats for this business
+        total_logs = SystemLog.objects.filter(user__in=business_users).count()
+        total_security_events = SecurityEvent.objects.filter(user__in=business_users).count()
+        total_login_attempts = SecurityEvent.objects.filter(
+            user__in=business_users,
+            event_type='login_attempt'
+        ).count()
+    else:
+        # If no business context, show empty results
+        logs = SystemLog.objects.none()
+        security_events = SecurityEvent.objects.none()
+        login_events = SecurityEvent.objects.none()
+        suspicious_activities = SecurityEvent.objects.none()
+        total_logs = 0
+        total_security_events = 0
+        total_login_attempts = 0
+    
+    context = {
+        'logs': logs,
+        'security_events': security_events,
+        'login_events': login_events,
+        'suspicious_activities': suspicious_activities,
+        'total_logs': total_logs,
+        'total_security_events': total_security_events,
+        'total_login_attempts': total_login_attempts,
+    }
+    
+    return render(request, 'settings/user_activity_logs.html', context)

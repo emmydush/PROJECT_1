@@ -1,0 +1,37 @@
+{% extends 'superadmin/base_tenant.html' %}
+
+{% block title %}Deactivate Business - {{ business.company_name }}{% endblock %}
+
+{% block tenant_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Business Deactivation</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">Are you sure you want to deactivate your business "<strong>{{ business.company_name }}</strong>"?</p>
+                <p>This action will:</p>
+                <ul>
+                    <li>Suspend all user accounts associated with this business</li>
+                    <li>Make all business data inaccessible</li>
+                    <li>Cancel all active subscriptions</li>
+                </ul>
+                <p class="text-danger"><strong>This action can be reversed by contacting support, but your data will remain inaccessible until then.</strong></p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'settings:business' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-power-off me-1"></i>Yes, Deactivate Business
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

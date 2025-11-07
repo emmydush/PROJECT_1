@@ -1,0 +1,425 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}User Management - Smart Solution{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>User Management</h1>
+  <div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+      <i class="fas fa-plus me-1"></i> Add New User
+    </button>
+  </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-1">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ total_users }}</h5>
+            <p class="stat-label text-white mb-0">Total Users</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-2">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ active_users }}</h5>
+            <p class="stat-label text-white mb-0">Active Users</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-user-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ suspended_users }}</h5>
+            <p class="stat-label text-white mb-0">Suspended Users</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-user-slash fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ users|length }}</h5>
+            <p class="stat-label text-white mb-0">Visible Users</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-eye fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Role Distribution -->
+<div class="section-header mb-4">
+  <h2>User Role Distribution</h2>
+  <p>Distribution of users across different roles</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Count</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for role_data in role_distribution %}
+              <tr>
+                <td>{{ role_data.role|title }}</td>
+                <td>{{ role_data.count }}</td>
+                <td>
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" 
+                         data-width="{{ role_data.percentage }}" 
+                         aria-valuenow="{{ role_data.percentage }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                      {{ role_data.percentage }}%
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center">No role data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Management Table -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">All Users</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Businesses</th>
+            <th>Last Login</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user_data in users %}
+          {% with user=user_data.user %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="me-3">
+                  {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle" width="40" height="40">
+                  {% else %}
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                      <i class="fas fa-user text-muted"></i>
+                    </div>
+                  {% endif %}
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+                  <small class="text-muted">{{ user.username }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="badge 
+                {% if user.role == 'admin' %}bg-primary
+                {% elif user.role == 'manager' %}bg-success
+                {% elif user.role == 'cashier' %}bg-info
+                {% elif user.role == 'stock_manager' %}bg-warning
+                {% else %}bg-secondary{% endif %}">
+                {{ user.get_role_display }}
+              </span>
+            </td>
+            <td>
+              {% if user_data.businesses %}
+                <div class="d-flex flex-wrap gap-1">
+                  {% for business in user_data.businesses|slice:":3" %}
+                    <span class="badge bg-light text-dark">{{ business.company_name }}</span>
+                  {% endfor %}
+                  {% if user_data.business_count > 3 %}
+                    <span class="badge bg-secondary">+{{ user_data.business_count|add:"-3" }} more</span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span class="text-muted">No businesses</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user_data.last_login %}
+                {{ user_data.last_login|date:"M d, Y H:i" }}
+              {% else %}
+                Never
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge 
+                {% if user.is_active %}bg-success
+                {% else %}bg-danger{% endif %}">
+                {% if user.is_active %}Active{% else %}Suspended{% endif %}
+              </span>
+            </td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userActionDropdown{{ user.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                  Actions
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="userActionDropdown{{ user.id }}">
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit User</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  {% if user.is_active %}
+                    <li><a class="dropdown-item text-warning block-user-btn" href="#" data-user-id="{{ user.id }}"><i class="fas fa-user-slash me-2"></i>Block User</a></li>
+                  {% else %}
+                    <li><a class="dropdown-item text-success unblock-user-btn" href="#" data-user-id="{{ user.id }}"><i class="fas fa-user-check me-2"></i>Unblock User</a></li>
+                  {% endif %}
+                  <li><a class="dropdown-item text-info reset-password-btn" href="#" data-user-id="{{ user.id }}"><i class="fas fa-key me-2"></i>Reset Password</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger delete-user-btn" href="#" data-user-id="{{ user.id }}"><i class="fas fa-trash me-2"></i>Delete User</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% endwith %}
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center">No users found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addUserForm">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="firstName" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="firstName">
+          </div>
+          <div class="mb-3">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="lastName">
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role">
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="cashier">Cashier</option>
+              <option value="stock_manager">Stock Manager</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="businesses" class="form-label">Assign to Businesses</label>
+            <select multiple class="form-select" id="businesses">
+              {% for business in businesses %}
+                <option value="{{ business.id }}">{{ business.company_name }}</option>
+              {% endfor %}
+            </select>
+            <small class="text-muted">Hold Ctrl/Cmd to select multiple businesses</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveUserBtn">Create User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <input type="hidden" id="editUserId">
+          <div class="mb-3">
+            <label for="editUsername" class="form-label">Username</label>
+            <input type="text" class="form-control" id="editUsername" required>
+          </div>
+          <div class="mb-3">
+            <label for="editEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="editEmail" required>
+          </div>
+          <div class="mb-3">
+            <label for="editFirstName" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="editFirstName">
+          </div>
+          <div class="mb-3">
+            <label for="editLastName" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="editLastName">
+          </div>
+          <div class="mb-3">
+            <label for="editRole" class="form-label">Role</label>
+            <select class="form-select" id="editRole">
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="cashier">Cashier</option>
+              <option value="stock_manager">Stock Manager</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editBusinesses" class="form-label">Assign to Businesses</label>
+            <select multiple class="form-select" id="editBusinesses">
+              {% for business in businesses %}
+                <option value="{{ business.id }}">{{ business.company_name }}</option>
+              {% endfor %}
+            </select>
+            <small class="text-muted">Hold Ctrl/Cmd to select multiple businesses</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="updateUserBtn">Update User</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add any JavaScript needed for the user management interface
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+  
+  // Set progress bar widths dynamically to avoid CSS parsing issues
+  var progressBars = document.querySelectorAll('.progress-bar');
+  progressBars.forEach(function(bar) {
+    var width = bar.getAttribute('data-width');
+    if (width) {
+      bar.style.width = width + '%';
+    }
+  });
+  
+  // Handle user action buttons
+  document.querySelectorAll('.dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const action = this.textContent.trim();
+      const userId = this.getAttribute('data-user-id');
+      const userName = this.closest('tr').querySelector('h6').textContent;
+      
+      if (this.classList.contains('block-user-btn')) {
+        if (confirm(`Are you sure you want to block ${userName}?`)) {
+          // Implement block user logic here
+          alert(`Block user action confirmed for ${userName}`);
+        }
+      } else if (this.classList.contains('unblock-user-btn')) {
+        if (confirm(`Are you sure you want to unblock ${userName}?`)) {
+          // Implement unblock user logic here
+          alert(`Unblock user action confirmed for ${userName}`);
+        }
+      } else if (this.classList.contains('reset-password-btn')) {
+        if (confirm(`Are you sure you want to reset the password for ${userName}?`)) {
+          // Implement reset password logic here
+          alert(`Reset password action confirmed for ${userName}`);
+        }
+      } else if (this.classList.contains('delete-user-btn')) {
+        if (confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+          // Implement delete user logic here
+          alert(`Delete user action confirmed for ${userName}`);
+        }
+      } else {
+        // Other actions
+        alert(`Action: ${action} for ${userName}`);
+      }
+    });
+  });
+  
+  // Handle save user button
+  document.getElementById('saveUserBtn').addEventListener('click', function() {
+    // Implement save user logic here
+    alert('User creation functionality would be implemented here');
+    // Close the modal
+    var addUserModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+    addUserModal.hide();
+  });
+  
+  // Handle update user button
+  document.getElementById('updateUserBtn').addEventListener('click', function() {
+    // Implement update user logic here
+    alert('User update functionality would be implemented here');
+    // Close the modal
+    var editUserModal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+    editUserModal.hide();
+  });
+});
+</script>
+{% endblock %}

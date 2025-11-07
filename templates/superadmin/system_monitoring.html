@@ -1,0 +1,369 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}System Monitoring - Smart Solution{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>System Monitoring & Usage</h1>
+  <div>
+    <button class="btn btn-primary" id="refreshMonitoring">
+      <i class="fas fa-sync-alt me-1"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- System Health Overview -->
+<div class="section-header mb-4">
+  <h2>System Health Overview</h2>
+  <p>Real-time monitoring of server resources and system performance</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-1">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ cpu_percent|floatformat:1 }}%</h5>
+            <p class="stat-label text-white mb-0">CPU Usage</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-microchip fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-2">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">
+              {% if memory_info %}
+                {{ memory_info.percent|floatformat:1 }}%
+              {% else %}
+                0%
+              {% endif %}
+            </h5>
+            <p class="stat-label text-white mb-0">Memory Usage</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-memory fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ uptime_formatted }}</h5>
+            <p class="stat-label text-white mb-0">System Uptime</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-clock fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">
+              {% if disk_usage %}
+                {{ disk_usage.percent|floatformat:1 }}%
+              {% else %}
+                0%
+              {% endif %}
+            </h5>
+            <p class="stat-label text-white mb-0">Disk Usage</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-hdd fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- System Information -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">System Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Platform:</strong></td>
+                <td>{{ system_info.platform }}</td>
+              </tr>
+              <tr>
+                <td><strong>Version:</strong></td>
+                <td>{{ system_info.platform_version }}</td>
+              </tr>
+              <tr>
+                <td><strong>Architecture:</strong></td>
+                <td>{{ system_info.architecture }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Processor:</strong></td>
+                <td>{{ system_info.processor }}</td>
+              </tr>
+              <tr>
+                <td><strong>Python Version:</strong></td>
+                <td>{{ system_info.python_version }}</td>
+              </tr>
+              <tr>
+                <td><strong>Server Time:</strong></td>
+                <td>{{ now|date:"M d, Y H:i:s" }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API Monitoring Summary -->
+<div class="section-header mb-4">
+  <h2>API Monitoring</h2>
+  <p>Track API usage and performance metrics</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-5">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ api_summary.total_requests }}</h5>
+            <p class="stat-label text-white mb-0">Total Requests</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-exchange-alt fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-6">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ api_summary.requests_today }}</h5>
+            <p class="stat-label text-white mb-0">Requests Today</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-calendar-day fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-1">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ api_summary.avg_response_time|floatformat:2 }}ms</h5>
+            <p class="stat-label text-white mb-0">Avg Response Time</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-tachometer-alt fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-2">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ active_api_clients }}/{{ total_api_clients }}</h5>
+            <p class="stat-label text-white mb-0">Active API Clients</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-plug fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error Logs and Failed Transactions -->
+<div class="section-header mb-4">
+  <h2>Error Monitoring</h2>
+  <p>Track system errors and failed transactions</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Error Logs</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Message</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in error_logs %}
+            <tr>
+              <td>
+                <span class="badge bg-danger">{{ log.level|upper }}</span>
+              </td>
+              <td>{{ log.message|truncatewords:8 }}</td>
+              <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">No error logs found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Failed Transactions</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Sale ID</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in failed_transactions %}
+            <tr>
+              <td>#{{ transaction.id }}</td>
+              <td>{{ transaction.total_amount|floatformat:2 }}</td>
+              <td>
+                <span class="badge bg-warning">Refunded</span>
+              </td>
+              <td>{{ transaction.updated_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center">No failed transactions found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications Center -->
+<div class="section-header mb-4">
+  <h2>Notifications Center</h2>
+  <p>System alerts and important notifications</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">Recent System Alerts</h5>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>Message</th>
+          <th>User</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notification in recent_notifications %}
+        <tr>
+          <td>
+            <span class="badge 
+              {% if notification.level == 'warning' %}bg-warning
+              {% elif notification.level == 'error' %}bg-danger
+              {% elif notification.level == 'critical' %}bg-dark
+              {% else %}bg-info{% endif %}">
+              {{ notification.level|upper }}
+            </span>
+          </td>
+          <td>{{ notification.message|truncatewords:10 }}</td>
+          <td>{{ notification.user.username|default:"System" }}</td>
+          <td>{{ notification.timestamp|date:"M d, Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No notifications found</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add any JavaScript needed for the system monitoring interface
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+  
+  // Handle refresh button
+  document.getElementById('refreshMonitoring').addEventListener('click', function() {
+    // Add loading state
+    const button = this;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
+    button.disabled = true;
+    
+    // Simulate refresh delay
+    setTimeout(function() {
+      // In a real implementation, this would make an AJAX call to refresh data
+      location.reload();
+    }, 1000);
+  });
+});
+</script>
+{% endblock %}

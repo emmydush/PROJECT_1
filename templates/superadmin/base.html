@@ -58,10 +58,12 @@
   border-radius: 0.5rem;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   transition: transform 0.2s ease;
+  border: none;
 }
 
 .card-stats:hover {
   transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .stat-number {
@@ -96,6 +98,64 @@
 .chart-container {
   position: relative;
   height: 300px;
+}
+
+/* Gradient backgrounds for different card types */
+.card-gradient-1 {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: white;
+}
+
+.card-gradient-2 {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.card-gradient-3 {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.card-gradient-4 {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.card-gradient-5 {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.card-gradient-6 {
+  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+  color: white;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-weight: 700;
+  color: #343a40;
+}
+
+.section-header p {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.progress-bar {
+  border-radius: 5px;
+}
+
+.table-borderless td {
+  border: 0;
 }
 </style>
 {% endblock %}
@@ -174,9 +234,27 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'user_management' %}active{% endif %}" 
+             href="{% url 'superadmin:user_management' %}">
+            <i class="fas fa-users me-2"></i> User Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'financial_dashboard' %}active{% endif %}" 
+             href="{% url 'superadmin:financial_dashboard' %}">
+            <i class="fas fa-chart-line me-2"></i> Financial Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'subscription_management' %}active{% endif %}" 
              href="{% url 'superadmin:subscription_management' %}">
             <i class="fas fa-credit-card me-2"></i> Subscriptions
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'system_monitoring' %}active{% endif %}" 
+             href="{% url 'superadmin:system_monitoring' %}">
+            <i class="fas fa-server me-2"></i> System Monitoring
           </a>
         </li>
         <li class="nav-item">

@@ -10,8 +10,8 @@ from superadmin.models import Business
 
 User = get_user_model()
 
-# Get the admin user
-admin = User.objects.get(username='admin')
+# Get the admin user (now emmanuel)
+admin = User.objects.get(username='emmanuel')
 
 # Check if business already exists
 if not Business.objects.filter(owner=admin).exists():

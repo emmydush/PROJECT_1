@@ -9,12 +9,14 @@ A comprehensive inventory management system built with Django, Python, and Postg
 - Role-based access control
 - Profile management
 - Password reset functionality
+- Multi-tenancy support with business registration and management
 
 ### Dashboard
 - Overview cards (Total Sales, Total Products, Total Customers, Low Stock Alerts)
 - Graphs & charts (Sales trends, Top-selling products)
 - Daily/Monthly revenue summary
 - Recent transactions list
+- Branch switching capability
 
 ### Product & Inventory Management
 - Add/Edit/Delete products
@@ -72,6 +74,7 @@ A comprehensive inventory management system built with Django, Python, and Postg
 - Expense report
 - Supplier & customer statements
 - Export data to CSV, PDF, or Excel
+- Branch performance reports
 
 ### Notifications & Alerts
 - Low stock or expiry alerts
@@ -84,6 +87,20 @@ A comprehensive inventory management system built with Django, Python, and Postg
 - Barcode format options
 - Backup & restore database
 - User permissions management
+- Branch management for multi-location businesses
+
+### Tenant Account Management
+- Business registration and setup
+- Update business details (name, contact info, etc.)
+- Add or remove branches
+- Deactivate business account when needed
+- Branch management:
+  - Create, edit, or delete branches
+  - Assign names, locations, and managers for each branch
+  - Monitor branch activities (sales, stock, staff performance)
+  - Switch between branches in the dashboard to view specific data
+  - Generate combined reports from all branches
+- See [TENANT_ACCOUNT_MANAGEMENT.md](TENANT_ACCOUNT_MANAGEMENT.md) for detailed documentation
 
 ## Technology Stack
 
@@ -94,81 +111,4 @@ A comprehensive inventory management system built with Django, Python, and Postg
 - **File Storage**: Django Media Files
 - **Charts**: Chart.js
 
-## Installation
-
-### Option 1: Traditional Installation
-
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   ```
-
-2. Create a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-4. Configure PostgreSQL database settings in `inventory_management/settings.py`
-
-5. Run migrations:
-   ```
-   python manage.py migrate
-   ```
-
-6. Create a superuser:
-   ```
-   python manage.py createsuperuser
-   ```
-
-7. Run the development server:
-   ```
-   python manage.py runserver
-   ```
-
-### Option 2: Docker Installation (Recommended)
-
-For easier setup and deployment, you can use Docker and Docker Compose:
-
-1. Make sure Docker Desktop is running
-2. Open a terminal in the project root directory
-3. Build and start the containers:
-   ```bash
-   docker-compose up -d
-   ```
-4. The application will be available at http://localhost:8000
-
-See [DOCKER_README.md](DOCKER_README.md) for detailed Docker setup instructions.
-
-## Usage
-
-1. Access the admin panel at `http://localhost:8000/admin/`
-2. Access the main application at `http://localhost:8000/`
-3. Register a new user or login with the superuser account
-4. Configure business settings in the admin panel
-5. Start adding products, suppliers, and customers
-6. Use the POS system for sales transactions
-7. Generate reports to analyze business performance
-
-## Modules
-
-- `authentication`: User authentication and management
-- `dashboard`: Main dashboard with overview statistics
-- `products`: Product and inventory management
-- `suppliers`: Supplier management
-- `purchases`: Purchase order management
-- `sales`: Sales and POS system
-- `customers`: Customer management
-- `expenses`: Expense tracking
-- `reports`: Business reporting and analytics
-- `notifications`: System notifications and alerts
-- `settings`: System configuration and settings
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+// ... existing content ...

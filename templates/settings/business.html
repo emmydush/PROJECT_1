@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Business Settings - {{ business_settings.business_name }}{% endblock %}
+{% block title %}Business Settings - {{ business.company_name }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -108,6 +108,42 @@
                     <a href="{% url 'settings:index' %}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Business Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ business.company_name }}</h6>
+                <p class="text-muted">
+                    <i class="fas fa-envelope me-2"></i> {{ business.email }}<br>
+                    <i class="fas fa-industry me-2"></i> {{ business.get_business_type_display }}<br>
+                    <i class="fas fa-calendar-alt me-2"></i> Created: {{ business.created_at|date:"M d, Y" }}<br>
+                    <i class="fas fa-sync-alt me-2"></i> Last Updated: {{ business.updated_at|date:"M d, Y" }}<br>
+                    <i class="fas fa-user-tie me-2"></i> Owner: {{ business.owner.get_full_name|default:business.owner.username }}<br>
+                    <i class="fas fa-clipboard-list me-2"></i> Plan: {{ business.get_plan_type_display }}<br>
+                    <i class="fas fa-info-circle me-2"></i> Status: 
+                    <span class="badge 
+                        {% if business.status == 'active' %}bg-success
+                        {% elif business.status == 'pending' %}bg-warning
+                        {% else %}bg-danger{% endif %}">
+                        {{ business.get_status_display }}
+                    </span>
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'superadmin:business_update' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Update Business Details
+                    </a>
+                    <a href="{% url 'superadmin:branch_list' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-map-marker-alt me-1"></i>Manage Branches
+                    </a>
+                    <a href="{% url 'superadmin:business_deactivate' %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-power-off me-1"></i>Deactivate Business
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

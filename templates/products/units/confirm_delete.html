@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Unit - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Delete Unit</h3>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the unit <strong>{{ unit.name }} ({{ unit.symbol }})</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Unit
+                        </button>
+                        <a href="{% url 'products:unit_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

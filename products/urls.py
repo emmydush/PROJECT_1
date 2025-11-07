@@ -19,4 +19,7 @@ urlpatterns = [
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
     path('units/', views.unit_list, name='unit_list'),
     path('units/create/', views.unit_create, name='unit_create'),
+    path('units/<int:pk>/update/', views.unit_update, name='unit_update'),
+    path('units/<int:pk>/delete/', views.unit_delete, name='unit_delete'),
+    path('test-context/', views.test_business_context, name='test_context'),
 ]

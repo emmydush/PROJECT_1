@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}User Management - Smart Solution{% endblock %}
+{% block title %}User Management - {{ business_settings.business_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -40,21 +40,21 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-info">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-warning">
+                        <a href="{% url 'authentication:edit_user' user.id %}" class="btn btn-sm btn-warning">
                             <i class="fas fa-edit"></i>
                         </a>
                         {% if user.is_active %}
-                        <a href="#" class="btn btn-sm btn-danger">
-                            <i class="fas fa-user-slash"></i>
-                        </a>
+                            <a href="{% url 'authentication:deactivate_user' user.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                <i class="fas fa-user-slash"></i>
+                            </a>
                         {% else %}
-                        <a href="#" class="btn btn-sm btn-success">
-                            <i class="fas fa-user-check"></i>
-                        </a>
+                            <a href="{% url 'authentication:activate_user' user.id %}" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this user?')">
+                                <i class="fas fa-user-check"></i>
+                            </a>
                         {% endif %}
+                        <a href="{% url 'authentication:reset_user_password' user.id %}" class="btn btn-sm btn-info" onclick="return confirm('Are you sure you want to reset this user\'s password?')">
+                            <i class="fas fa-key"></i>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}

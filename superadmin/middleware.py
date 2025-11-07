@@ -36,9 +36,10 @@ class BusinessContextMiddleware:
                 from .models import Business
                 business = Business.objects.get(id=business_id)
                 set_current_business(business)
-            except Business.DoesNotExist:
-                # If the business doesn't exist, clear the session value
-                request.session.pop('current_business_id', None)
+            except (Business.DoesNotExist, ValueError, TypeError):
+                # If the business doesn't exist or business_id is invalid, clear the session value
+                if 'current_business_id' in request.session:
+                    del request.session['current_business_id']
         
         response = self.get_response(request)
         

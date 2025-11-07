@@ -1,0 +1,105 @@
+{% extends 'superadmin/base_tenant.html' %}
+
+{% block title %}Branch Reports - {{ business.company_name }}{% endblock %}
+
+{% block tenant_content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Branch Performance Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Overall Business Metrics</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Total Products</td>
+                                        <td>{{ overall_products }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Sales</td>
+                                        <td>{{ overall_sales }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Customers</td>
+                                        <td>{{ overall_customers }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Purchases</td>
+                                        <td>{{ overall_purchases }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Expenses</td>
+                                        <td>{{ overall_expenses }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Sales Value</td>
+                                        <td>{{ business.settings.currency_symbol }}{{ overall_sales_value|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Expenses Value</td>
+                                        <td>{{ business.settings.currency_symbol }}{{ overall_expenses_value|floatformat:2 }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h6>Branch-wise Metrics</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Branch</th>
+                                        <th>Products</th>
+                                        <th>Sales</th>
+                                        <th>Customers</th>
+                                        <th>Purchases</th>
+                                        <th>Expenses</th>
+                                        <th>Sales Value</th>
+                                        <th>Expenses Value</th>
+                                        <th>Net Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for metric in branch_metrics %}
+                                    <tr>
+                                        <td>
+                                            {{ metric.branch.name }}
+                                            {% if metric.branch.is_main %}
+                                                <span class="badge bg-primary">Main</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ metric.total_products }}</td>
+                                        <td>{{ metric.total_sales }}</td>
+                                        <td>{{ metric.total_customers }}</td>
+                                        <td>{{ metric.total_purchases }}</td>
+                                        <td>{{ metric.total_expenses }}</td>
+                                        <td>{{ business.settings.currency_symbol }}{{ metric.total_sales_value|floatformat:2 }}</td>
+                                        <td>{{ business.settings.currency_symbol }}{{ metric.total_expenses_value|floatformat:2 }}</td>
+                                        <td>{{ business.settings.currency_symbol }}{{ metric.total_sales_value|floatformat:2|add:metric.total_expenses_value|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

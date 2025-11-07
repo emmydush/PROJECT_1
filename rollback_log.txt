@@ -1,0 +1,14 @@
+2025-11-07 19:40:52,347 [INFO] ============================================================
+2025-11-07 19:40:52,348 [INFO] EMERGENCY ROLLBACK PROCEDURE
+2025-11-07 19:40:52,348 [INFO] ============================================================
+2025-11-07 19:40:54,171 [INFO] Django setup completed successfully
+2025-11-07 19:40:54,174 [INFO] Starting backup restoration...
+2025-11-07 19:40:54,175 [INFO] Listing available backups...
+2025-11-07 19:40:54,179 [INFO] Available backups:
+2025-11-07 19:40:54,181 [INFO]   1. backup_20251031_123952.zip (Modified: 2025-10-31 12:39:54.972630)
+2025-11-07 19:40:54,182 [INFO]   2. backup_20251031_125457.zip (Modified: 2025-10-31 12:54:59.097389)
+2025-11-07 19:40:54,183 [INFO]   3. backup_20251101_142419.zip (Modified: 2025-11-01 14:24:21.835715)
+2025-11-07 19:40:54,185 [INFO]   4. pre_migration_backup_20251107_194011.zip (Modified: 2025-11-07 19:40:18.072386)
+2025-11-07 19:40:54,186 [INFO]   5. test_backup.zip (Modified: 2025-11-03 12:07:51.974195)
+2025-11-07 19:40:54,187 [ERROR] Backup '--help' not found
+2025-11-07 19:40:54,188 [ERROR] Backup restoration failed

@@ -53,6 +53,7 @@ class Branch(models.Model):
     address = models.TextField()
     phone = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    manager = models.ForeignKey('authentication.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_branches')
     is_main = models.BooleanField(default=False)  # type: ignore
     is_active = models.BooleanField(default=True)  # type: ignore
     created_at = models.DateTimeField(auto_now_add=True)

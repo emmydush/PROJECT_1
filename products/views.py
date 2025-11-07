@@ -19,6 +19,29 @@ from .forms import ProductForm, CategoryForm, UnitForm
 from .utils import generate_product_qr_code
 
 @login_required
+def test_business_context(request):
+    # Get current business from middleware
+    from superadmin.middleware import get_current_business
+    current_business = get_current_business()
+    
+    # Get units using business-specific manager
+    units = Unit.objects.business_specific()
+    
+    # Get all units for comparison
+    all_units = Unit.objects.all()
+    
+    response_data = {
+        'current_business': current_business.company_name if current_business else None,
+        'current_business_id': current_business.id if current_business else None,
+        'business_specific_units_count': units.count(),
+        'all_units_count': all_units.count(),
+        'session_business_id': request.session.get('current_business_id'),
+        'units': [{'name': u.name, 'symbol': u.symbol} for u in units]
+    }
+    
+    return JsonResponse(response_data)
+
+@login_required
 def product_list(request):
     # Get search and filter parameters
     search_query = request.GET.get('search', '')
@@ -221,7 +244,7 @@ def product_delete(request, pk):
 
 @login_required
 def category_list(request):
-    categories = Category.objects.all()
+    categories = Category.objects.business_specific()
     return render(request, 'products/categories/list.html', {'categories': categories})
 
 @login_required
@@ -299,7 +322,7 @@ def category_delete(request, pk):
 
 @login_required
 def unit_list(request):
-    units = Unit.objects.all()
+    units = Unit.objects.business_specific()
     return render(request, 'products/units/list.html', {'units': units})
 
 @login_required
@@ -329,6 +352,51 @@ def unit_create(request):
         form = UnitForm()
     
     return render(request, 'products/units/form.html', {'form': form, 'title': 'Create Unit'})
+
+@login_required
+def unit_update(request, pk):
+    unit = get_object_or_404(Unit, pk=pk)
+    
+    if request.method == 'POST':
+        form = UnitForm(request.POST, instance=unit)
+        if form.is_valid():
+            # Set the business context for the unit
+            unit = form.save(commit=False)
+            # Get the current business from the request
+            from superadmin.middleware import get_current_business
+            current_business = get_current_business()
+            if current_business:
+                unit.business = current_business
+                unit.save()
+                messages.success(request, 'Unit updated successfully!')
+                return redirect('products:unit_list')
+            else:
+                messages.error(request, 'No business context found. Please select a business before updating units.')
+        else:
+            # Form is not valid, display errors
+            if form.errors:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+    else:
+        form = UnitForm(instance=unit)
+    
+    return render(request, 'products/units/form.html', {
+        'form': form, 
+        'title': 'Update Unit',
+        'unit': unit
+    })
+
+@login_required
+def unit_delete(request, pk):
+    unit = get_object_or_404(Unit, pk=pk)
+    
+    if request.method == 'POST':
+        unit.delete()
+        messages.success(request, 'Unit deleted successfully!')
+        return redirect('products:unit_list')
+    
+    return render(request, 'products/units/confirm_delete.html', {'unit': unit})
 
 @login_required
 def bulk_upload(request):
@@ -448,7 +516,7 @@ def export_products_csv(request):
     ])
     
     # Write data rows
-    products = Product.objects.all().select_related('category', 'unit')
+    products = Product.objects.business_specific().select_related('category', 'unit')
     for product in products:
         writer.writerow([
             product.name,

@@ -1,12 +1,24 @@
-{% extends 'base.html' %}
+{% extends 'superadmin/base_tenant.html' %}
 
-{% block title %}Dashboard - {{ business_settings.business_name }}{% endblock %}
+{% block title %}Dashboard - {{ current_business.company_name }}{% endblock %}
 
-{% block content %}
+{% block tenant_content %}
 <!-- Dashboard Header -->
 <div class="dashboard-header">
-    <h1>{% if current_business %}{{ current_business.company_name }}{% endif %}</h1>
-    <p>Welcome back, {{ user.username }}! Here's what's happening with your business today.</p>
+    <h1>
+        {% if current_branch %}
+            {{ current_branch.name }} Dashboard
+        {% else %}
+            {{ current_business.company_name }} Dashboard
+        {% endif %}
+    </h1>
+    <p>Welcome back, {{ user.username }}! 
+       {% if current_branch %}
+           Viewing data for branch: <strong>{{ current_branch.name }}</strong>.
+       {% else %}
+           Viewing consolidated business data.
+       {% endif %}
+    </p>
 </div>
 
 <!-- Dashboard Stats -->
@@ -58,7 +70,7 @@
                     <div class="stat-icon text-white">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="stat-number text-white">{{ business_settings.currency_symbol }}{{ today_profit|floatformat:2 }}</div>
+                    <div class="stat-number text-white">{{ current_business.settings.currency_symbol }}{{ today_profit|floatformat:2 }}</div>
                     <div class="stat-title text-white">Today's Profit</div>
                 </div>
             </div>
@@ -69,7 +81,13 @@
 <!-- Charts and Recent Activity Section -->
 <div class="section-header">
     <h2>Business Insights</h2>
-    <p>Key performance indicators and recent activities</p>
+    <p>
+        {% if current_branch %}
+            Key performance indicators for branch: <strong>{{ current_branch.name }}</strong>
+        {% else %}
+            Key performance indicators for all branches combined
+        {% endif %}
+    </p>
 </div>
 
 <div class="row">

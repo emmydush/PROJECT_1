@@ -1,5 +1,6 @@
 from django.db import models
 from .middleware import get_current_business
+from .models import Branch
 
 class BusinessSpecificManager(models.Manager):
     """
@@ -29,4 +30,18 @@ class BusinessSpecificManager(models.Manager):
         """
         Filter objects by a specific business.
         """
-        return self.get_queryset().filter(business=business)
+        # Bypass the current business context filtering and filter directly by business
+        return super().get_queryset().filter(business=business)
+    
+    def for_branch(self, branch):
+        """
+        Filter objects by a specific branch.
+        """
+        # Get the current business first
+        current_business = get_current_business()
+        if not current_business:
+            # If no business context, return empty queryset
+            return self.get_queryset().none()
+        
+        # Filter by both business and branch
+        return super().get_queryset().filter(business=current_business, branch=branch)

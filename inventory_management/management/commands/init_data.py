@@ -10,17 +10,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Create superuser if it doesn't exist
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser(
-                username='admin',
-                email='admin@example.com',
-                password='admin123',
-                first_name='Admin',
+        if not User.objects.filter(username='emmanuel').exists():
+            user = User.objects.create_superuser(
+                username='emmanuel',
+                email='emmanuel@example.com',
+                password='Jesus@12',
+                first_name='Emmanuel',
                 last_name='User',
                 role='admin'
             )
+            # Ensure the user is also a staff member for admin access
+            user.is_staff = True
+            user.save()
             self.stdout.write(
-                self.style.SUCCESS('Successfully created superuser "admin" with password "admin123"')
+                self.style.SUCCESS('Successfully created superuser "emmanuel" with password "Jesus@12"')
             )
         
         # Create sample categories

@@ -1,6 +1,6 @@
 from django.db import models
 from typing import TYPE_CHECKING
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.managers import BusinessSpecificManager
 
 if TYPE_CHECKING:
@@ -15,6 +15,8 @@ class Customer(models.Model):
         
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='customers', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='customers', null=True, blank=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(blank=True, null=True)

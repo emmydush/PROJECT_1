@@ -8,6 +8,7 @@ urlpatterns = [
     path('business/', views.business_settings, name='business'),
     path('barcode/', views.barcode_settings, name='barcode'),
     path('users/', views.user_management, name='users'),
+    path('user-activity-logs/', views.user_activity_logs, name='user_activity_logs'),
     path('backup/', views.backup_restore, name='backup'),
     path('backup/settings/', views.backup_settings, name='backup_settings'),
     path('backup/download/<str:filename>/', views.download_backup, name='download_backup'),

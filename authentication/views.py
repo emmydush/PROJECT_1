@@ -214,3 +214,157 @@ def edit_user_view(request, user_id):
         'form': form,
         'user_to_edit': user_to_edit
     })
+
+@login_required
+def deactivate_user_view(request, user_id):
+    from .models import User
+    from superadmin.middleware import get_current_business
+    
+    current_business = get_current_business()
+    if not current_business:
+        messages.error(request, 'No business context found.')
+        return redirect('dashboard:index')
+    
+    # Only admins can deactivate users
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to deactivate users.')
+        return redirect('dashboard:index')
+    
+    # Get the user to deactivate
+    try:
+        user_to_deactivate = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('authentication:user_list')
+    
+    # Check if the user belongs to the same business
+    if not user_to_deactivate.businesses.filter(id=current_business.id).exists():
+        messages.error(request, 'You do not have permission to deactivate this user.')
+        return redirect('authentication:user_list')
+    
+    # Prevent users from deactivating themselves
+    if user_to_deactivate == request.user:
+        messages.error(request, 'You cannot deactivate your own account.')
+        return redirect('authentication:user_list')
+    
+    # Deactivate the user
+    user_to_deactivate.is_active = False
+    user_to_deactivate.save()
+    
+    # Log the action
+    from superadmin.models import SystemLog
+    SystemLog.objects.create(
+        level='info',
+        message=f'User {user_to_deactivate.username} deactivated by {request.user.username}',
+        user=request.user,
+        ip_address=get_client_ip(request)
+    )
+    
+    messages.success(request, f'User {user_to_deactivate.username} has been deactivated.')
+    return redirect('authentication:user_list')
+
+@login_required
+def activate_user_view(request, user_id):
+    from .models import User
+    from superadmin.middleware import get_current_business
+    
+    current_business = get_current_business()
+    if not current_business:
+        messages.error(request, 'No business context found.')
+        return redirect('dashboard:index')
+    
+    # Only admins can activate users
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to activate users.')
+        return redirect('dashboard:index')
+    
+    # Get the user to activate
+    try:
+        user_to_activate = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('authentication:user_list')
+    
+    # Check if the user belongs to the same business
+    if not user_to_activate.businesses.filter(id=current_business.id).exists():
+        messages.error(request, 'You do not have permission to activate this user.')
+        return redirect('authentication:user_list')
+    
+    # Activate the user
+    user_to_activate.is_active = True
+    user_to_activate.save()
+    
+    # Log the action
+    from superadmin.models import SystemLog
+    SystemLog.objects.create(
+        level='info',
+        message=f'User {user_to_activate.username} activated by {request.user.username}',
+        user=request.user,
+        ip_address=get_client_ip(request)
+    )
+    
+    messages.success(request, f'User {user_to_activate.username} has been activated.')
+    return redirect('authentication:user_list')
+
+@login_required
+def reset_user_password_view(request, user_id):
+    from .models import User
+    from django.contrib.auth.forms import SetPasswordForm
+    from superadmin.middleware import get_current_business
+    
+    current_business = get_current_business()
+    if not current_business:
+        messages.error(request, 'No business context found.')
+        return redirect('dashboard:index')
+    
+    # Only admins can reset user passwords
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to reset user passwords.')
+        return redirect('dashboard:index')
+    
+    # Get the user whose password will be reset
+    try:
+        user_to_reset = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('authentication:user_list')
+    
+    # Check if the user belongs to the same business
+    if not user_to_reset.businesses.filter(id=current_business.id).exists():
+        messages.error(request, 'You do not have permission to reset this user\'s password.')
+        return redirect('authentication:user_list')
+    
+    if request.method == 'POST':
+        form = SetPasswordForm(user_to_reset, request.POST)
+        if form.is_valid():
+            form.save()
+            
+            # Log the action
+            from superadmin.models import SystemLog
+            SystemLog.objects.create(
+                level='info',
+                message=f'Password reset for user {user_to_reset.username} by {request.user.username}',
+                user=request.user,
+                ip_address=get_client_ip(request)
+            )
+            
+            messages.success(request, f'Password for {user_to_reset.username} has been reset successfully.')
+            return redirect('authentication:user_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SetPasswordForm(user_to_reset)
+    
+    return render(request, 'authentication/reset_user_password.html', {
+        'form': form,
+        'user_to_reset': user_to_reset
+    })
+
+def get_client_ip(request):
+    """Get the client's IP address from the request"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip

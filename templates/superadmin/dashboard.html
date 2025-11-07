@@ -1,10 +1,10 @@
 {% extends 'superadmin/base.html' %}
 
-{% block title %}Dashboard - Super Admin - Smart Solution{% endblock %}
+{% block title %}Owner Dashboard - Smart Solution{% endblock %}
 
 {% block superadmin_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h1>Super Admin Dashboard</h1>
+  <h1>Platform Owner Dashboard</h1>
   <div>
     <button class="btn btn-primary">
       <i class="fas fa-sync-alt me-1"></i> Refresh
@@ -12,9 +12,15 @@
   </div>
 </div>
 
+<!-- Overview / Analytics Summary -->
+<div class="section-header mb-4">
+  <h2>Platform Overview</h2>
+  <p>Key metrics across all businesses in the system</p>
+</div>
+
 <!-- Stats Cards -->
 <div class="row mb-4">
-  <div class="col-md-2 mb-4">
+  <div class="col-md-3 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
@@ -30,13 +36,13 @@
     </div>
   </div>
   
-  <div class="col-md-2 mb-4">
+  <div class="col-md-3 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h5 class="stat-number">{{ total_users }}</h5>
-            <p class="stat-label mb-0">Total Users</p>
+            <h5 class="stat-number">{{ total_active_users }}</h5>
+            <p class="stat-label mb-0">Total Active Users</p>
           </div>
           <div class="bg-success text-white p-3 rounded-circle">
             <i class="fas fa-users fa-2x"></i>
@@ -46,23 +52,47 @@
     </div>
   </div>
   
-  <div class="col-md-2 mb-4">
+  <div class="col-md-3 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h5 class="stat-number">{{ active_subscriptions }}</h5>
-            <p class="stat-label mb-0">Active Subscriptions</p>
+            <h5 class="stat-number">{{ business_metrics.total_sales_value|floatformat:2 }}</h5>
+            <p class="stat-label mb-0">Total Sales Volume</p>
           </div>
           <div class="bg-info text-white p-3 rounded-circle">
-            <i class="fas fa-credit-card fa-2x"></i>
+            <i class="fas fa-shopping-cart fa-2x"></i>
           </div>
         </div>
       </div>
     </div>
   </div>
   
-  <div class="col-md-2 mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number">{{ monthly_usage }}</h5>
+            <p class="stat-label mb-0">Monthly System Usage</p>
+          </div>
+          <div class="bg-warning text-white p-3 rounded-circle">
+            <i class="fas fa-chart-line fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Subscription and Revenue Summary -->
+<div class="section-header mb-4">
+  <h2>Subscription & Revenue Summary</h2>
+  <p>Financial overview of the platform</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
@@ -70,7 +100,7 @@
             <h5 class="stat-number">{{ total_revenue|floatformat:2 }}</h5>
             <p class="stat-label mb-0">Total Revenue</p>
           </div>
-          <div class="bg-warning text-white p-3 rounded-circle">
+          <div class="bg-success text-white p-3 rounded-circle">
             <i class="fas fa-dollar-sign fa-2x"></i>
           </div>
         </div>
@@ -78,31 +108,31 @@
     </div>
   </div>
   
-  <div class="col-md-2 mb-4">
+  <div class="col-md-4 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h5 class="stat-number">{{ security_events }}</h5>
-            <p class="stat-label mb-0">Security Alerts</p>
+            <h5 class="stat-number">{{ active_subscriptions }}</h5>
+            <p class="stat-label mb-0">Active Subscriptions</p>
           </div>
-          <div class="bg-danger text-white p-3 rounded-circle">
-            <i class="fas fa-shield-alt fa-2x"></i>
+          <div class="bg-primary text-white p-3 rounded-circle">
+            <i class="fas fa-credit-card fa-2x"></i>
           </div>
         </div>
       </div>
     </div>
   </div>
   
-  <div class="col-md-2 mb-4">
+  <div class="col-md-4 mb-4">
     <div class="card card-stats h-100">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h5 class="stat-number">{{ open_tickets }}</h5>
-            <p class="stat-label mb-0">Open Tickets</p>
+            <p class="stat-label mb-0">Open Support Tickets</p>
           </div>
-          <div class="bg-secondary text-white p-3 rounded-circle">
+          <div class="bg-danger text-white p-3 rounded-circle">
             <i class="fas fa-ticket-alt fa-2x"></i>
           </div>
         </div>
@@ -111,7 +141,84 @@
   </div>
 </div>
 
-<!-- Recent Activities -->
+<!-- Business Distribution by Plan -->
+<div class="section-header mb-4">
+  <h2>Business Distribution</h2>
+  <p>How businesses are distributed across different plans</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Businesses by Plan Type</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Plan Type</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for plan in business_plan_distribution %}
+              <tr>
+                <td>{{ plan.plan_type|title }}</td>
+                <td>{{ plan.count }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center">No data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Subscription Status</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for status in subscription_status_distribution %}
+              <tr>
+                <td>{{ status.is_active|yesno:"Active,Inactive" }}</td>
+                <td>{{ status.count }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center">No data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- System Health and Activity -->
+<div class="section-header mb-4">
+  <h2>System Health & Activity</h2>
+  <p>Platform performance and security metrics</p>
+</div>
+
 <div class="row">
   <div class="col-md-4">
     <div class="card">

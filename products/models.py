@@ -8,7 +8,7 @@ from io import BytesIO
 import re
 
 # Import the Business model for multi-tenancy
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.managers import BusinessSpecificManager
 
 if TYPE_CHECKING:
@@ -67,6 +67,8 @@ class Product(models.Model):
         
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='products', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
         
     BARCODE_FORMAT_CHOICES = [
         ('code128', 'Code 128 (High Density)'),

@@ -1,0 +1,318 @@
+{% extends 'superadmin/base.html' %}
+
+{% block title %}Financial Dashboard - Smart Solution{% endblock %}
+
+{% block superadmin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Financial Dashboard</h1>
+  <div>
+    <a href="{% url 'superadmin:export_financial_report' %}" class="btn btn-success">
+      <i class="fas fa-file-export me-1"></i> Export Report
+    </a>
+  </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="section-header mb-4">
+  <h2>Financial Overview</h2>
+  <p>Revenue and profit tracking across all tenants</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-1">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ total_revenue|floatformat:2 }}</h5>
+            <p class="stat-label text-white mb-0">Total Revenue</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-dollar-sign fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-2">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ revenue_this_month|floatformat:2 }}</h5>
+            <p class="stat-label text-white mb-0">Revenue This Month</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-calendar-alt fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 card-gradient-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">{{ revenue_last_month|floatformat:2 }}</h5>
+            <p class="stat-label text-white mb-0">Revenue Last Month</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-history fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card card-stats h-100 
+      {% if profit_change_percentage >= 0 %}card-gradient-4{% else %}card-gradient-5{% endif %}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="stat-number text-white">
+              {% if profit_change_percentage >= 0 %}+{% endif %}{{ profit_change_percentage|floatformat:1 }}%
+            </h5>
+            <p class="stat-label text-white mb-0">Monthly Change</p>
+          </div>
+          <div class="text-white p-3 rounded-circle">
+            <i class="fas fa-chart-line fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upcoming Payments -->
+<div class="section-header mb-4">
+  <h2>Upcoming Payments</h2>
+  <p>Subscriptions expiring in the next 30 days</p>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Business</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Expiration Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for subscription in upcoming_payments %}
+          <tr>
+            <td>{{ subscription.business.company_name }}</td>
+            <td>{{ subscription.plan.name }}</td>
+            <td>{{ subscription.plan.price|floatformat:2 }}</td>
+            <td>{{ subscription.end_date|date:"M d, Y" }}</td>
+            <td>
+              <span class="badge bg-warning">Expiring Soon</span>
+            </td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  Actions
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Send Reminder</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-sync me-2"></i>Renew Subscription</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Change Plan</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center">No upcoming payments</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Revenue per Tenant -->
+<div class="section-header mb-4">
+  <h2>Revenue per Tenant</h2>
+  <p>Financial contribution by business</p>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Business</th>
+            <th>Owner</th>
+            <th>Plan</th>
+            <th>Subscriptions</th>
+            <th>Total Revenue</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for business_data in business_revenue %}
+          {% with business=business_data.business %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="me-3">
+                  <i class="fas fa-building fa-2x text-primary"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ business.company_name }}</h6>
+                  <small class="text-muted">{{ business.email }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ business.owner.get_full_name|default:business.owner.username }}</td>
+            <td>
+              {% if business.subscriptions.first %}
+                <span class="badge bg-info">{{ business.subscriptions.first.plan.name }}</span>
+              {% else %}
+                <span class="badge bg-secondary">No Subscription</span>
+              {% endif %}
+            </td>
+            <td>{{ business_data.subscription_count }}</td>
+            <td>{{ business_data.total_revenue|floatformat:2 }}</td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  Actions
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice-dollar me-2"></i>Generate Invoice</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>View Reports</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% endwith %}
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center">No business revenue data</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Plan Revenue Distribution -->
+<div class="section-header mb-4">
+  <h2>Plan Revenue Distribution</h2>
+  <p>Revenue breakdown by subscription plan</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Revenue by Plan</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Plan</th>
+                <th>Total Revenue</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for plan in plan_revenue_distribution %}
+              <tr>
+                <td>{{ plan.name }}</td>
+                <td>{{ plan.total_revenue|floatformat:2 }}</td>
+                <td>
+                  {% if total_revenue > 0 %}
+                    {% widthratio plan.total_revenue total_revenue 100 %}%
+                  {% else %}
+                    0%
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center">No plan revenue data</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Payments</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Plan</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for payment in recent_payments %}
+            <tr>
+              <td>{{ payment.subscription.business.company_name }}</td>
+              <td>{{ payment.subscription.plan.name }}</td>
+              <td>{{ payment.amount|floatformat:2 }}</td>
+              <td>{{ payment.created_at|date:"M d, Y" }}</td>
+              <td>
+                <span class="badge 
+                  {% if payment.status == 'completed' %}bg-success
+                  {% elif payment.status == 'pending' %}bg-warning
+                  {% elif payment.status == 'failed' %}bg-danger
+                  {% else %}bg-secondary{% endif %}">
+                  {{ payment.status|title }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No recent payments</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add any JavaScript needed for the financial dashboard interface
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+});
+</script>
+{% endblock %}

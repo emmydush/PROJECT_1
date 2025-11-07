@@ -20,6 +20,12 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="support-tickets-tab" data-bs-toggle="tab" data-bs-target="#support-tickets" type="button" role="tab">Support Tickets</button>
   </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="tenant-messages-tab" data-bs-toggle="tab" data-bs-target="#tenant-messages" type="button" role="tab">Tenant Messages</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback" type="button" role="tab">Feedback & Surveys</button>
+  </li>
 </ul>
 
 <!-- Tab Content -->
@@ -77,25 +83,44 @@
   <!-- Support Tickets Tab -->
   <div class="tab-pane fade" id="support-tickets" role="tabpanel">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Support Tickets</h5>
+        <div>
+          <select class="form-select form-select-sm" style="width: auto; display: inline-block;">
+            <option>All Statuses</option>
+            <option>Open</option>
+            <option>In Progress</option>
+            <option>Resolved</option>
+            <option>Closed</option>
+          </select>
+          <select class="form-select form-select-sm ms-2" style="width: auto; display: inline-block;">
+            <option>All Priorities</option>
+            <option>Urgent</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead>
             <tr>
+              <th>Ticket ID</th>
               <th>Business</th>
               <th>Subject</th>
               <th>Priority</th>
               <th>Status</th>
               <th>Assigned To</th>
               <th>Created</th>
+              <th>Last Updated</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for ticket in tickets %}
             <tr>
+              <td>#{{ ticket.id }}</td>
               <td>{{ ticket.business.company_name }}</td>
               <td>{{ ticket.subject }}</td>
               <td>
@@ -110,9 +135,10 @@
               </td>
               <td>{{ ticket.assigned_to.username|default:"Unassigned" }}</td>
               <td>{{ ticket.created_at|date:"M d, Y" }}</td>
+              <td>{{ ticket.updated_at|date:"M d, Y" }}</td>
               <td>
                 <div class="btn-group btn-group-sm" role="group">
-                  <a href="#" class="btn btn-outline-primary" title="View Details">
+                  <a href="#" class="btn btn-outline-primary" title="View Details" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal">
                     <i class="fas fa-eye"></i>
                   </a>
                   <a href="#" class="btn btn-outline-warning" title="Assign">
@@ -123,9 +149,253 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="7" class="text-center">No support tickets found</td>
+              <td colspan="9" class="text-center">No support tickets found</td>
             </tr>
             {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tenant Messages Tab -->
+  <div class="tab-pane fade" id="tenant-messages" role="tabpanel">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Tenant Messages</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="list-group" id="messageList" role="tablist">
+              <a class="list-group-item list-group-item-action active" id="message1-list" data-bs-toggle="list" href="#message1" role="tab">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">Tech Solutions Inc.</h6>
+                  <small>2 hours ago</small>
+                </div>
+                <p class="mb-1">Need help with product import...</p>
+                <small>Unread</small>
+              </a>
+              <a class="list-group-item list-group-item-action" id="message2-list" data-bs-toggle="list" href="#message2" role="tab">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">Global Retail Group</h6>
+                  <small>1 day ago</small>
+                </div>
+                <p class="mb-1">Subscription renewal question</p>
+                <small>Read</small>
+              </a>
+              <a class="list-group-item list-group-item-action" id="message3-list" data-bs-toggle="list" href="#message3" role="tab">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">Innovative Startups</h6>
+                  <small>3 days ago</small>
+                </div>
+                <p class="mb-1">API integration assistance</p>
+                <small>Read</small>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="tab-content" id="messageContent">
+              <div class="tab-pane fade show active" id="message1" role="tabpanel">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">Message from Tech Solutions Inc.</h5>
+                      <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-reply me-1"></i> Reply
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <p>Hello, we're having trouble importing our product catalog. The CSV file seems to be formatted correctly, but we're getting validation errors. Can you please assist?</p>
+                    <p>Best regards,<br>Sarah Johnson<br>Tech Solutions Inc.</p>
+                    <hr>
+                    <h6>Reply:</h6>
+                    <textarea class="form-control" rows="4" placeholder="Type your reply here..."></textarea>
+                    <div class="mt-2">
+                      <button class="btn btn-primary">Send Reply</button>
+                      <button class="btn btn-outline-secondary">Attach File</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="message2" role="tabpanel">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">Message from Global Retail Group</h5>
+                      <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-reply me-1"></i> Reply
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <p>Hi, we're approaching our subscription renewal date and wanted to confirm the process for upgrading to the Enterprise plan. Could you please provide details?</p>
+                    <p>Thank you,<br>Michael Chen<br>Global Retail Group</p>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="message3" role="tabpanel">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">Message from Innovative Startups</h5>
+                      <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-reply me-1"></i> Reply
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <p>Hello team, we're trying to integrate with your API but are having issues with the authentication process. Documentation seems to be outdated. Can you provide updated examples?</p>
+                    <p>Thanks,<br>Alex Rodriguez<br>Innovative Startups</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Feedback & Surveys Tab -->
+  <div class="tab-pane fade" id="feedback" role="tabpanel">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Feedback Collection</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5>Send Feedback Request</h5>
+                <form>
+                  <div class="mb-3">
+                    <label for="feedbackType" class="form-label">Feedback Type</label>
+                    <select class="form-select" id="feedbackType">
+                      <option>General Satisfaction</option>
+                      <option>Feature Request</option>
+                      <option>Bug Report</option>
+                      <option>Performance Feedback</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="targetGroup" class="form-label">Target Group</label>
+                    <select class="form-select" id="targetGroup">
+                      <option>All Tenants</option>
+                      <option>Enterprise Plan</option>
+                      <option>Professional Plan</option>
+                      <option>Starter Plan</option>
+                      <option>Specific Business</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="messageTemplate" class="form-label">Message Template</label>
+                    <textarea class="form-control" id="messageTemplate" rows="4">We value your opinion! Please take a moment to share your feedback about our platform. Your input helps us improve our services.</textarea>
+                  </div>
+                  <button type="button" class="btn btn-primary">Send Feedback Request</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5>Recent Feedback Summary</h5>
+                <div class="progress mb-3">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">Satisfied (75%)</div>
+                </div>
+                <div class="progress mb-3">
+                  <div class="progress-bar bg-warning" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">Neutral (15%)</div>
+                </div>
+                <div class="progress mb-3">
+                  <div class="progress-bar bg-danger" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">Dissatisfied (10%)</div>
+                </div>
+                <p class="mt-3"><strong>Most Requested Features:</strong></p>
+                <ul>
+                  <li>Mobile App Integration (42 responses)</li>
+                  <li>Advanced Reporting (38 responses)</li>
+                  <li>Multi-language Support (29 responses)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Survey Responses</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Feedback Type</th>
+              <th>Rating</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tech Solutions Inc.</td>
+              <td>Feature Request</td>
+              <td>
+                <div class="rating">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                </div>
+              </td>
+              <td>2023-06-15</td>
+              <td><span class="badge bg-info">New</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary">View</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Global Retail Group</td>
+              <td>General Satisfaction</td>
+              <td>
+                <div class="rating">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                </div>
+              </td>
+              <td>2023-06-10</td>
+              <td><span class="badge bg-success">Reviewed</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary">View</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Innovative Startups</td>
+              <td>Bug Report</td>
+              <td>
+                <div class="rating">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                </div>
+              </td>
+              <td>2023-06-05</td>
+              <td><span class="badge bg-danger">Pending</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary">View</button>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -151,6 +421,16 @@
             <label for="announcementContent" class="form-label">Content</label>
             <textarea class="form-control" id="announcementContent" rows="4" required></textarea>
           </div>
+          <div class="mb-3">
+            <label for="targetAudience" class="form-label">Target Audience</label>
+            <select class="form-select" id="targetAudience">
+              <option>All Tenants</option>
+              <option>Enterprise Plan</option>
+              <option>Professional Plan</option>
+              <option>Starter Plan</option>
+              <option>Specific Business</option>
+            </select>
+          </div>
           <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" id="isActive" checked>
             <label class="form-check-label" for="isActive">Active</label>
@@ -160,6 +440,70 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary">Create Announcement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Details Modal -->
+<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ticketDetailsModalLabel">Ticket #1234 - Product Import Issue</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Business:</strong> Tech Solutions Inc.</p>
+            <p><strong>Priority:</strong> <span class="badge bg-danger">Urgent</span></p>
+            <p><strong>Status:</strong> <span class="badge bg-warning">In Progress</span></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Created:</strong> Jun 12, 2023 14:30</p>
+            <p><strong>Assigned To:</strong> John Smith</p>
+            <p><strong>Last Updated:</strong> Jun 13, 2023 09:15</p>
+          </div>
+        </div>
+        <hr>
+        <h6>Description:</h6>
+        <p>Customer is having trouble importing their product catalog. The CSV file seems to be formatted correctly, but they're getting validation errors. Need to investigate and provide assistance.</p>
+        <hr>
+        <h6>Conversation:</h6>
+        <div class="card mb-3">
+          <div class="card-body">
+            <p class="mb-1"><strong>Customer:</strong> Hello, we're having trouble importing our product catalog...</p>
+            <small class="text-muted">Jun 12, 2023 14:30</small>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body bg-light">
+            <p class="mb-1"><strong>Support Agent:</strong> Thank you for reaching out. I'm looking into this issue now and will get back to you shortly with a solution.</p>
+            <small class="text-muted">Jun 12, 2023 15:45</small>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <p class="mb-1"><strong>Customer:</strong> Thanks for the quick response. We're in the middle of a big product launch and need this resolved ASAP.</p>
+            <small class="text-muted">Jun 12, 2023 16:20</small>
+          </div>
+        </div>
+        <hr>
+        <h6>Add Response:</h6>
+        <textarea class="form-control" rows="4" placeholder="Type your response here..."></textarea>
+        <div class="mt-2">
+          <button class="btn btn-primary">Send Response</button>
+          <button class="btn btn-outline-secondary">Attach File</button>
+          <div class="float-end">
+            <select class="form-select form-select-sm d-inline-block w-auto">
+              <option>Change to Resolved</option>
+              <option>Change to In Progress</option>
+              <option>Reassign</option>
+            </select>
+            <button class="btn btn-sm btn-outline-primary">Update</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

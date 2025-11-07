@@ -1,7 +1,7 @@
 from django.db import models
 from products.models import Product
 from customers.models import Customer
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.managers import BusinessSpecificManager
 from authentication.models import User
 
@@ -9,6 +9,8 @@ class Cart(models.Model):
     objects = BusinessSpecificManager()
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='carts', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='carts', null=True, blank=True)
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     session_key = models.CharField(max_length=40, null=True, blank=True)
@@ -30,6 +32,8 @@ class Cart(models.Model):
 class CartItem(models.Model):
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='cart_items', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='cart_items', null=True, blank=True)
     
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -55,6 +59,8 @@ class Sale(models.Model):
     
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='sales', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='sales', null=True, blank=True)
     
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     sale_date = models.DateTimeField(auto_now_add=True)
@@ -78,6 +84,8 @@ class SaleItem(models.Model):
     objects = BusinessSpecificManager()
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='sale_items', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='sale_items', null=True, blank=True)
     
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -94,6 +102,8 @@ class Refund(models.Model):
     objects = BusinessSpecificManager()
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='refunds', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='refunds', null=True, blank=True)
     
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
     reason = models.TextField()

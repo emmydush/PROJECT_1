@@ -65,12 +65,14 @@ python manage.py shell
 ```
 
 Then in the shell:
-```python
+```
 from authentication.models import User
 
-# Get a user and update their role
-user = User.objects.get(username='admin')
+# Get the superadmin user (now emmanuel)
+user = User.objects.get(username='emmanuel')
 user.role = 'admin'
+user.is_staff = True
+user.is_superuser = True
 user.save()
 
 # Or update multiple users

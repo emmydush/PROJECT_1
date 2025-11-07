@@ -29,12 +29,12 @@
 }
 
 [data-theme="custom"] .sidebar .nav-link:hover {
-  background: rgba(var(--theme-primary-rgb), 0.25);
+  background: rgba(0, 0, 0, 0.25);
   color: var(--theme-primary);
 }
 
 [data-theme="custom"] .sidebar .nav-link.active {
-  background: rgba(var(--theme-primary-rgb), 0.3);
+  background: rgba(0, 0, 0, 0.3);
   color: var(--theme-primary);
 }
 

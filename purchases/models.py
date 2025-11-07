@@ -1,7 +1,7 @@
 from django.db import models
 from products.models import Product
 from suppliers.models import Supplier
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.managers import BusinessSpecificManager
 
 class PurchaseOrder(models.Model):
@@ -17,6 +17,8 @@ class PurchaseOrder(models.Model):
     
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='purchase_orders', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='purchase_orders', null=True, blank=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     order_date = models.DateField()
     expected_delivery_date = models.DateField(blank=True, null=True)

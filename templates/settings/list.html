@@ -29,13 +29,22 @@
         </div>
     </div>
     
-    {% if user.role == 'admin' %}
+    {% if user.is_authenticated and user.role == 'admin' %}
     <div class="col-md-4 mb-4">
         <div class="border rounded p-4 h-100 text-center card-gradient-3">
             <i class="fas fa-users fa-3x text-info mb-3"></i>
             <h5>User Management</h5>
             <p class="text-muted">Manage user accounts, roles, and permissions.</p>
             <a href="{% url 'settings:users' %}" class="btn btn-info">Manage</a>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="border rounded p-4 h-100 text-center card-gradient-4">
+            <i class="fas fa-user-clock fa-3x text-warning mb-3"></i>
+            <h5>User Activity Logs</h5>
+            <p class="text-muted">View user activity logs and security events.</p>
+            <a href="{% url 'settings:user_activity_logs' %}" class="btn btn-warning">View Logs</a>
         </div>
     </div>
     {% endif %}

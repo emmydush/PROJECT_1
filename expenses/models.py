@@ -1,5 +1,5 @@
 from django.db import models
-from superadmin.models import Business
+from superadmin.models import Business, Branch
 from superadmin.managers import BusinessSpecificManager
 
 class ExpenseCategory(models.Model):
@@ -28,6 +28,8 @@ class Expense(models.Model):
     
     # Add business relationship for multi-tenancy
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='expenses', null=True)
+    # Add branch relationship for branch-specific data
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='expenses', null=True, blank=True)
     category = models.ForeignKey(ExpenseCategory, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
