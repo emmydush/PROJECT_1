@@ -29,6 +29,10 @@ fi
 # Wait for database to be ready
 python wait-for-db.py
 
+# Create new migrations based on model changes
+echo "Creating migrations..."
+python manage.py makemigrations
+
 # Run migrations
 echo "Running migrations..."
 python manage.py migrate
