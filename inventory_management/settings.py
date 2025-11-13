@@ -35,9 +35,16 @@ ALLOWED_HOSTS_ENV = config('ALLOWED_HOSTS', default=None)
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(',') if isinstance(ALLOWED_HOSTS_ENV, str) else list(ALLOWED_HOSTS_ENV)
 else:
-    # Production fallback: allow Render domains
+    # Production fallback: allow Render domains and specific subdomains
     if not DEBUG or config('DATABASE_URL', default=None):
-        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.onrender.com', '.onrender.com']
+        ALLOWED_HOSTS = [
+            'localhost', 
+            '127.0.0.1', 
+            '*.onrender.com', 
+            '.onrender.com',
+            'smart-inventory-management-686n.onrender.com',
+            'www.smart-inventory-management-686n.onrender.com'
+        ]
     else:
         # Development fallback
         ALLOWED_HOSTS = ['localhost', '127.0.0.1']
