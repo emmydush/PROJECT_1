@@ -47,4 +47,5 @@ python manage.py create_test_users || true
 
 # Start the server with Gunicorn for production
 echo "Starting server with Gunicorn..."
+# Use the PORT environment variable if set, otherwise default to 8000
 exec gunicorn inventory_management.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --worker-class sync --timeout 60
