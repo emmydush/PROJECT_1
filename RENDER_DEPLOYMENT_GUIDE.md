@@ -75,6 +75,47 @@ In the Render dashboard for your Web Service:
 
 3. Deploy changes
 
+## DATABASE_URL format and host resolution
+
+Render and other PaaS providers provide a single `DATABASE_URL` connection string
+that Django can consume. Important notes and examples:
+
+- Required format (Postgres):
+
+   ```text
+   postgresql://<username>:<password>@<host>:<port>/<dbname>
+   ```
+
+- Example (Render managed Postgres):
+
+   ```text
+   postgresql://postgres:MySecretPassword@db.abc123.render.com:5432/inventory_db
+   ```
+
+- Example (Docker Compose local testing where the DB service is named `db`):
+
+   ```text
+   postgresql://postgres:password@db:5432/inventory_db
+   ```
+
+- Do not leave `DATABASE_URL` empty. If `DATABASE_URL` is empty the Django
+   settings code will skip parsing but the app will either fall back to
+   `local_settings.py` or to a local SQLite database — which is not suitable
+   for production.
+
+- Host resolution:
+   - If you deploy with Docker Compose and your Postgres service is named `db`,
+      the hostname `db` is correct. If you deploy on Render, use the host provided
+      by Render's Postgres service (looks like `db.<hash>.render.com`).
+   - The `wait-for-db.py` script in this repo expects an env var naming the host
+      (it uses `DB_HOST` or the host parsed from `DATABASE_URL` depending on
+      your deployment). Make sure the host in `DATABASE_URL` is reachable from
+      your Web Service.
+
+If you're unsure what to put, create the Postgres service on Render first and
+copy the DATABASE_URL string shown in the Render dashboard directly into the
+Web Service environment variables.
+
 ## Step 4: Monitor Deployment
 
 1. Go to Logs tab to see deployment progress

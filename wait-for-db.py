@@ -3,6 +3,7 @@ import socket
 import time
 import sys
 import os
+import urllib.parse
 
 def wait_for_port(port, host='localhost', timeout=30.0):
     """Wait until a port starts accepting TCP connections.
@@ -25,10 +26,24 @@ def wait_for_port(port, host='localhost', timeout=30.0):
                                    'connections.'.format(port, host)) from ex
 
 if __name__ == '__main__':
-    # Get database host and port from environment variables or use defaults
-    db_host = os.environ.get('DB_HOST', 'db')
-    db_port = int(os.environ.get('DB_PORT', 5432))
-    
+    # Get database host and port from environment variables or use DATABASE_URL
+    db_host = os.environ.get('DB_HOST')
+    db_port_env = os.environ.get('DB_PORT')
+
+    if not db_host:
+        database_url = os.environ.get('DATABASE_URL')
+        if database_url:
+            parsed = urllib.parse.urlparse(database_url)
+            # urlparse handles postgresql://host:port/path
+            db_host = parsed.hostname or 'db'
+            db_port = parsed.port or 5432
+        else:
+            # default to Docker-compose service name
+            db_host = 'db'
+            db_port = int(db_port_env) if db_port_env else 5432
+    else:
+        db_port = int(db_port_env) if db_port_env else 5432
+
     print(f"Waiting for database at {db_host}:{db_port}...")
     wait_for_port(db_port, db_host)
     print("Database is ready!")

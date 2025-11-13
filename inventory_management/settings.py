@@ -100,17 +100,22 @@ WSGI_APPLICATION = 'inventory_management.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # Support for DATABASE_URL from environment (for Render and other cloud platforms)
-# If DATABASE_URL is set, use it; otherwise fall back to local_settings.py
-if config('DATABASE_URL', default=None):
+# Read DATABASE_URL once and only call dj_database_url when it's non-empty.
+# This prevents dj_database_url from trying to parse an empty string which
+# raises a ValueError (seen in container logs).
+DATABASE_URL = config('DATABASE_URL', default=None)
+if DATABASE_URL and str(DATABASE_URL).strip():
+    # Safe to parse
     DATABASES = {
         'default': dj_database_url.config(
-            default=config('DATABASE_URL'),
+            default=DATABASE_URL,
             conn_max_age=600,
         )
     }
 else:
     try:
-        from .local_settings import DATABASES
+        # Use developer local settings if present
+        from .local_settings import DATABASES  # type: ignore
     except ImportError:
         # Fallback to SQLite if local_settings.py is not available
         DATABASES = {
