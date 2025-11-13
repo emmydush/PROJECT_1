@@ -28,7 +28,19 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-j@z%a^!@+m07654321zyx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# ALLOWED_HOSTS: Read from environment, with fallback for production
+# If ALLOWED_HOSTS env var is not set but we're in production (DEBUG=False or DATABASE_URL set),
+# allow all *.onrender.com domains to avoid DisallowedHost errors in Render deployment
+ALLOWED_HOSTS_ENV = config('ALLOWED_HOSTS', default=None)
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(',') if isinstance(ALLOWED_HOSTS_ENV, str) else list(ALLOWED_HOSTS_ENV)
+else:
+    # Production fallback: allow Render domains
+    if not DEBUG or config('DATABASE_URL', default=None):
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.onrender.com', '.onrender.com']
+    else:
+        # Development fallback
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
