@@ -14,5 +14,4 @@ urlpatterns = [
     path('backup/download/<str:filename>/', views.download_backup, name='download_backup'),
     path('theme/', views.theme_settings, name='theme'),
     path('email/', views.email_settings, name='email'),
-    path('voice/', views.voice_assistant, name='voice'),
 ]

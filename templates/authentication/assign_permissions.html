@@ -1,0 +1,50 @@
+{% extends 'authentication/base_auth.html' %}
+
+{% block title %}Assign Permissions{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Assign Permissions to {{ user_to_edit.username }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <h4>User Role: {{ user_to_edit.role }}</h4>
+                            <p class="text-muted">Permissions assigned below will override role-based permissions.</p>
+                        </div>
+                        
+                        {% for category, permissions in permissions_by_category.items %}
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ category|title }}</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for permission in permissions %}
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox" name="permission_{{ permission.id }}" class="form-check-input" id="id_permission_{{ permission.id }}" {% if permission_states|get_item:permission.id %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_permission_{{ permission.id }}">
+                                            {{ permission.name }} - {{ permission.description }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Save Permissions</button>
+                            <a href="{% url 'authentication:user_list' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

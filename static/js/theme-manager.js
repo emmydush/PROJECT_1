@@ -93,14 +93,6 @@ class ThemeManager {
 // Initialize theme manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     window.themeManager = new ThemeManager();
-    
-    // Attach event listener to theme toggle button
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
-            window.themeManager.toggleTheme();
-        });
-    }
 });
 
 // Export for use in other modules

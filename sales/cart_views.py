@@ -193,7 +193,8 @@ def add_to_cart(request):
                 product=product,
                 defaults={
                     'quantity': quantity,
-                    'unit_price': product.selling_price
+                    'unit_price': product.selling_price,
+                    'business': cart.business  # Explicitly set business context
                 }
             )
             
@@ -555,7 +556,8 @@ def process_sale_from_cart(request):
                         product=item.product,
                         quantity=item.quantity,
                         unit_price=item.unit_price,
-                        total_price=item.total_price
+                        total_price=item.total_price,
+                        business=current_business  # Explicitly set business context
                     )
                     logger.info(f"Sale item created: {sale_item}")
                 except Exception as e:

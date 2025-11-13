@@ -11,52 +11,62 @@
 
 /* Apply custom theme colors */
 [data-theme="custom"] {
-  background-color: var(--theme-background);
-  color: var(--theme-text);
+  background-color: var(--theme-background, #f8f9fa);
+  color: var(--theme-text, #343a40);
 }
 
 [data-theme="custom"] body {
-  background-color: var(--theme-background);
-  color: var(--theme-text);
+  background-color: var(--theme-background, #f8f9fa);
+  color: var(--theme-text, #343a40);
 }
 
 [data-theme="custom"] .navbar-custom {
-  background: linear-gradient(135deg, var(--theme-secondary) 0%, var(--theme-sidebar) 100%) !important;
+  /* Fallback gradient */
+  background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%) !important;
+  /* CSS variable gradient */
+  background: linear-gradient(135deg, var(--theme-secondary, #2c3e50) 0%, var(--theme-sidebar, #2c3e50) 100%) !important;
 }
 
 [data-theme="custom"] .sidebar {
-  background: linear-gradient(135deg, var(--theme-secondary) 0%, var(--theme-sidebar) 100%);
+  /* Fallback gradient */
+  background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%);
+  /* CSS variable gradient */
+  background: linear-gradient(135deg, var(--theme-secondary, #2c3e50) 0%, var(--theme-sidebar, #2c3e50) 100%);
 }
 
 [data-theme="custom"] .sidebar .nav-link:hover {
   background: rgba(0, 0, 0, 0.25);
-  color: var(--theme-primary);
+  color: var(--theme-primary, #3498db);
 }
 
 [data-theme="custom"] .sidebar .nav-link.active {
   background: rgba(0, 0, 0, 0.3);
-  color: var(--theme-primary);
+  color: var(--theme-primary, #3498db);
 }
 
 [data-theme="custom"] .card {
-  background-color: var(--theme-card);
+  background-color: var(--theme-card, #ffffff);
   border: 1px solid rgba(0, 0, 0, 0.125);
 }
 
 [data-theme="custom"] .btn-primary {
-  background-color: var(--theme-primary);
-  border-color: var(--theme-primary);
+  background-color: var(--theme-primary, #3498db);
+  border-color: var(--theme-primary, #3498db);
 }
 
 [data-theme="custom"] .btn-primary:hover {
-  background-color: color-mix(in srgb, var(--theme-primary) 80%, black);
-  border-color: color-mix(in srgb, var(--theme-primary) 80%, black);
+  /* Fallback for color-mix */
+  background-color: #2980b9;
+  border-color: #2980b9;
+  /* Modern browsers */
+  background-color: color-mix(in srgb, var(--theme-primary, #3498db) 80%, black);
+  border-color: color-mix(in srgb, var(--theme-primary, #3498db) 80%, black);
 }
 
 /* Utility classes for custom theme */
-.text-theme-primary { color: var(--theme-primary); }
-.text-theme-secondary { color: var(--theme-secondary); }
-.text-theme-accent { color: var(--theme-accent); }
-.bg-theme-primary { background-color: var(--theme-primary); }
-.bg-theme-secondary { background-color: var(--theme-secondary); }
-.bg-theme-accent { background-color: var(--theme-accent); }
+.text-theme-primary { color: var(--theme-primary, #3498db); }
+.text-theme-secondary { color: var(--theme-secondary, #2c3e50); }
+.text-theme-accent { color: var(--theme-accent, #e74c3c); }
+.bg-theme-primary { background-color: var(--theme-primary, #3498db); }
+.bg-theme-secondary { background-color: var(--theme-secondary, #2c3e50); }
+.bg-theme-accent { background-color: var(--theme-accent, #e74c3c); }

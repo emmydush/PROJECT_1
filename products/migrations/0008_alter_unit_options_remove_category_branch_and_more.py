@@ -23,9 +23,23 @@ class Migration(migrations.Migration):
             model_name='category',
             name='created_by',
         ),
-        migrations.AlterUniqueTogether(
-            name='product',
-            unique_together={('business', 'sku')},
+        # Safely handle unique constraint change using RunSQL to avoid conflicts
+        migrations.RunSQL(
+            # Forward operation - drop existing constraint if it exists, then add new one
+            """
+            -- Drop the existing unique constraint if it exists
+            ALTER TABLE products_product DROP CONSTRAINT IF EXISTS products_product_sku_uniq;
+            ALTER TABLE products_product DROP CONSTRAINT IF EXISTS products_product_sku_3c51a516_uniq;
+            -- Add the new unique constraint
+            ALTER TABLE products_product ADD CONSTRAINT products_product_business_sku_uniq UNIQUE (business_id, sku);
+            """,
+            # Reverse operation - drop new constraint and restore old one
+            """
+            -- Drop the new unique constraint
+            ALTER TABLE products_product DROP CONSTRAINT IF EXISTS products_product_business_sku_uniq;
+            -- Restore the old unique constraint
+            ALTER TABLE products_product ADD CONSTRAINT products_product_sku_3c51a516_uniq UNIQUE (sku);
+            """
         ),
         migrations.RemoveField(
             model_name='unit',

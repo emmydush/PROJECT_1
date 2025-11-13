@@ -10,8 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name='product',
-            unique_together={('sku',)},
-        ),
+        # Removed duplicate AlterUniqueTogether operation to avoid conflict
+        # The unique_together constraint is already set in migration 0005
     ]

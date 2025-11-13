@@ -472,3 +472,7 @@ def get_product_by_barcode(request, barcode):
         return JsonResponse(data)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def pos_test(request):
+    return render(request, 'sales/pos_test.html')

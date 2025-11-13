@@ -45,19 +45,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }, false);
     });
     
-    // Sidebar entrance animation
+    // Get sidebar element
     var sidebar = document.getElementById('sidebar');
+    
+    // Sidebar entrance animation
     if (sidebar && window.innerWidth < 768) {
         // Hide sidebar by default on smaller screens
         sidebar.classList.add('hidden');
     }
     
-    // Sidebar toggle functionality with animations
+    // Improved sidebar toggle functionality with animations
     var sidebarCollapse = document.getElementById('sidebarCollapse');
     
     if (sidebarCollapse && sidebar) {
         sidebarCollapse.addEventListener('click', function() {
-            sidebar.classList.toggle('hidden');
+            // Toggle sidebar visibility
+            sidebar.classList.toggle('show');
+            sidebar.classList.remove('hidden');
             
             // Force reflow to ensure animations work properly
             sidebar.offsetHeight;
@@ -74,31 +78,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Theme toggle functionality
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        const themeIcon = themeToggle.querySelector('i');
-        
-        // Check for saved theme preference or respect OS preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-        
-        // Apply initial theme
-        document.documentElement.setAttribute('data-theme', initialTheme);
-        themeIcon.className = initialTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        
-        // Toggle theme on button click
-        themeToggle.addEventListener('click', function() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    // Sidebar close button functionality (for mobile)
+    var sidebarClose = document.getElementById('sidebarClose');
+    
+    if (sidebarClose && sidebar) {
+        sidebarClose.addEventListener('click', function() {
+            sidebar.classList.remove('show');
+            sidebar.classList.add('hidden');
         });
     }
     
+
     // Add ripple effect to buttons
     const buttons = document.querySelectorAll('button, .btn');
     buttons.forEach(button => {

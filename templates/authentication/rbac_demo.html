@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}RBAC Demo{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Role-Based Access Control (RBAC) Demo</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>User Information</h4>
+                            <p><strong>Username:</strong> {{ user.username }}</p>
+                            <p><strong>Role:</strong> {{ user_role }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Permission Status</h4>
+                            <ul class="list-group">
+                                {% for perm_name, has_perm in permissions.items %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ perm_name }}
+                                    {% if has_perm %}
+                                        <span class="badge bg-success">GRANTED</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">DENIED</span>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4>How RBAC Works</h4>
+                            <p>The system checks permissions in this order:</p>
+                            <ol>
+                                <li>First, it checks if you have a specific user permission assigned</li>
+                                <li>If not, it checks if your role has the permission</li>
+                                <li>If neither exists, access is denied</li>
+                            </ol>
+                            
+                            <h5>Role Permissions</h5>
+                            <p>Each role has predefined permissions:</p>
+                            <ul>
+                                <li><strong>Admin:</strong> All permissions</li>
+                                <li><strong>Manager:</strong> Most permissions except user management</li>
+                                <li><strong>Cashier:</strong> Limited permissions focused on sales</li>
+                                <li><strong>Stock Manager:</strong> Inventory-related permissions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

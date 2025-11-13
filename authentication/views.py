@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, UserProfileForm
-from .models import User
+from .models import User, Permission, UserPermission
+from .decorators import permission_required, role_required
 from superadmin.models import Business
 from superadmin.forms import BusinessDetailsForm
 
@@ -123,6 +124,7 @@ def profile_view(request):
     return render(request, 'authentication/profile.html', {'form': form})
 
 @login_required
+@permission_required('view_users')
 def user_list_view(request):
     from .models import User
     # Only show users from the same business
@@ -143,6 +145,7 @@ def password_reset_view(request):
     return render(request, 'authentication/password_reset.html')
 
 @login_required
+@role_required(['admin'])
 def create_user_view(request):
     from .forms import AdminUserCreationForm
     from .models import User
@@ -172,6 +175,7 @@ def create_user_view(request):
     return render(request, 'authentication/create_user.html', {'form': form})
 
 @login_required
+@role_required(['admin'])
 def edit_user_view(request, user_id):
     from .forms import UserProfileForm
     from .models import User
@@ -216,6 +220,7 @@ def edit_user_view(request, user_id):
     })
 
 @login_required
+@role_required(['admin'])
 def deactivate_user_view(request, user_id):
     from .models import User
     from superadmin.middleware import get_current_business
@@ -264,6 +269,7 @@ def deactivate_user_view(request, user_id):
     return redirect('authentication:user_list')
 
 @login_required
+@role_required(['admin'])
 def activate_user_view(request, user_id):
     from .models import User
     from superadmin.middleware import get_current_business
@@ -307,6 +313,7 @@ def activate_user_view(request, user_id):
     return redirect('authentication:user_list')
 
 @login_required
+@role_required(['admin'])
 def reset_user_password_view(request, user_id):
     from .models import User
     from django.contrib.auth.forms import SetPasswordForm
@@ -360,6 +367,80 @@ def reset_user_password_view(request, user_id):
         'user_to_reset': user_to_reset
     })
 
+@login_required
+@role_required(['admin'])
+def assign_user_permissions_view(request, user_id):
+    from .models import User, Permission, UserPermission
+    from superadmin.middleware import get_current_business
+    
+    current_business = get_current_business()
+    if not current_business:
+        messages.error(request, 'No business context found.')
+        return redirect('dashboard:index')
+    
+    # Only admins can assign permissions
+    if request.user.role != 'admin':
+        messages.error(request, 'You do not have permission to assign user permissions.')
+        return redirect('dashboard:index')
+    
+    # Get the user to assign permissions to
+    try:
+        user_to_edit = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('authentication:user_list')
+    
+    # Check if the user belongs to the same business
+    if not user_to_edit.businesses.filter(id=current_business.id).exists():
+        messages.error(request, 'You do not have permission to assign permissions to this user.')
+        return redirect('authentication:user_list')
+    
+    # Get all permissions grouped by category
+    permissions_by_category = {}
+    for perm in Permission.objects.all().order_by('category', 'name'):
+        if perm.category not in permissions_by_category:
+            permissions_by_category[perm.category] = []
+        permissions_by_category[perm.category].append(perm)
+    
+    if request.method == 'POST':
+        # Process the form data
+        for category, perms in permissions_by_category.items():
+            for perm in perms:
+                field_name = f'permission_{perm.id}'
+                granted = request.POST.get(field_name, False) == 'on'
+                
+                # Check if user already has this permission
+                user_perm, created = UserPermission.objects.get_or_create(
+                    user=user_to_edit,
+                    permission=perm,
+                    defaults={'granted': granted}
+                )
+                # If not created, update the granted status
+                if not created:
+                    user_perm.granted = granted
+                    user_perm.save()
+        
+        messages.success(request, f'Permissions for {user_to_edit.username} updated successfully!')
+        return redirect('authentication:user_list')
+    
+    # Prepare initial values for the form
+    permission_states = {}
+    for category, perms in permissions_by_category.items():
+        for perm in perms:
+            # Check if user has this permission
+            try:
+                user_perm = UserPermission.objects.get(user=user_to_edit, permission=perm)
+                permission_states[perm.id] = user_perm.granted
+            except UserPermission.DoesNotExist:
+                # Check if user has this permission through their role
+                permission_states[perm.id] = user_to_edit.has_custom_permission(perm.name)
+    
+    return render(request, 'authentication/assign_permissions.html', {
+        'user_to_edit': user_to_edit,
+        'permissions_by_category': permissions_by_category,
+        'permission_states': permission_states
+    })
+
 def get_client_ip(request):
     """Get the client's IP address from the request"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -368,3 +449,23 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+# RBAC Demo View - shows how to use the permission system
+@login_required
+def rbac_demo_view(request):
+    """
+    Demo view showing how to check permissions in a view.
+    """
+    context = {
+        'user_role': request.user.role,
+        'permissions': {
+            'view_products': request.user.has_custom_permission('view_products'),
+            'add_products': request.user.has_custom_permission('add_products'),
+            'edit_products': request.user.has_custom_permission('edit_products'),
+            'delete_products': request.user.has_custom_permission('delete_products'),
+            'view_sales': request.user.has_custom_permission('view_sales'),
+            'add_sales': request.user.has_custom_permission('add_sales'),
+            'process_pos': request.user.has_custom_permission('process_pos'),
+        }
+    }
+    return render(request, 'authentication/rbac_demo.html', context)

@@ -372,7 +372,7 @@ class POSSystem {
                 console.error('Error initializing scanner:', err);
                 let errorMessage = 'Error initializing camera';
                 if (err.message) {
-                    errorMessage += ': ' + + err.message;
+                    errorMessage += ': ' + err.message;
                 } else if (typeof err === 'string') {
                     errorMessage += ': ' + err;
                 }
