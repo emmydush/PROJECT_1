@@ -27,6 +27,19 @@ SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
 ```
 
+### Critical: Set ALLOWED_HOSTS to Your Render Domain
+
+Your Render Web Service gets a unique domain like `project-xh5v.onrender.com`. Django requires the exact domain in `ALLOWED_HOSTS` or it will reject requests with a `DisallowedHost` error.
+
+**Steps:**
+1. Determine your Web Service domain (visible in Render dashboard, e.g., `project-xh5v.onrender.com`)
+2. In Render dashboard → Web Service → Environment, add or update:
+   ```
+   ALLOWED_HOSTS=project-xh5v.onrender.com,www.project-xh5v.onrender.com,localhost,127.0.0.1
+   ```
+   (Replace `project-xh5v` with your actual service name)
+3. Save and redeploy
+
 ### Generate a Secure SECRET_KEY
 
 Run this Python command locally:
@@ -68,7 +81,7 @@ In the Render dashboard for your Web Service:
 2. Add all variables from `.env.example`:
    - `DEBUG=False`
    - `SECRET_KEY=<your-generated-key>`
-   - `ALLOWED_HOSTS=<render-domain>`
+   - `ALLOWED_HOSTS=<your-exact-render-domain>` (e.g., `project-xh5v.onrender.com`)
    - `DATABASE_URL=<from-postgres-service>`
    - Email settings
    - Security settings
