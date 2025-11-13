@@ -1298,7 +1298,7 @@ URL.prototype.set = function set(part, value, fn) {
 URL.prototype.toString = function toString(stringify) {
   if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
 
-  var query
+  var query;
     , url = this
     , protocol = url.protocol;
 
